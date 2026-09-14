@@ -7,7 +7,7 @@ echo Pushing AgroBridge to https://github.com/vishal7701kumar-byte/AgroBridge1.g
 echo =======================================================
 echo.
 
-"C:\Users\VISHAL\.gemini\antigravity\scratch\mingit\cmd\git.exe" push -u origin main
+"C:\Users\VISHAL\AppData\Local\Programs\Git\cmd\git.exe" push -u origin main
 
 if %errorlevel% equ 0 (
     echo.
@@ -17,8 +17,10 @@ if %errorlevel% equ 0 (
     echo =======================================================
 ) else (
     echo.
+    echo =======================================================
     echo If GitHub asks for password, please use your GitHub Personal Access Token (PAT)
     echo instead of your regular account password.
+    echo =======================================================
 )
 
 pause

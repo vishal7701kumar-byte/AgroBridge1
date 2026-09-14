@@ -3,15 +3,21 @@ import {
   Sprout, TrendingUp, Package, DollarSign, MapPin, Plus, CheckCircle,
   RefreshCw, Sparkles, X, Pencil, Trash2, AlertTriangle, LineChart,
   Upload, Image as ImageIcon, Star, MessageSquare, ShieldAlert, CheckCircle2,
-  Send, Check, ShieldCheck, Bell, Award, Clock
+  Send, Check, ShieldCheck, Bell, Award, Clock, AlertOctagon, Scale, Zap,
+  Download, FileText, ArrowRight, BarChart3, Receipt
 } from 'lucide-react';
-import { farmerAPI, consumerAPI } from '../services/api';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip as RechartsTooltip, CartesianGrid, ReferenceLine } from 'recharts';
+import { farmerAPI, consumerAPI, aiAPI } from '../services/api';
 import AIDecisionModal from '../components/AIDecisionModal';
 import AIDemandForecastModal from '../components/AIDemandForecastModal';
 import FutureInsightsChart from '../components/FutureInsightsChart';
 import AgroProductImage, { getProductImage, FALLBACK_CATEGORY_IMAGES, DEFAULT_FOOD_IMAGE } from '../components/AgroProductImage';
+import AICropPricePredictionModal from '../components/AICropPricePredictionModal';
+import AICropQualityScannerModal from '../components/AICropQualityScannerModal';
+import SmartNegotiationModal from '../components/SmartNegotiationModal';
+import AIWasteAlertModal from '../components/AIWasteAlertModal';
 
-export default function FarmerDashboard({ currentUser, onLogout }) {
+export default function FarmerDashboard({ currentUser, onLogout, onNavigate }) {
   const [data, setData] = useState(null);
   const [crops, setCrops] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,6 +26,39 @@ export default function FarmerDashboard({ currentUser, onLogout }) {
   const [showDemandModal, setShowDemandModal] = useState(false);
   const [showStatusDetailsModal, setShowStatusDetailsModal] = useState(false);
   const [toast, setToast] = useState(null);
+
+  // Financial Analytics & Profit System State
+  const [finSummary, setFinSummary] = useState({
+    monthlyRevenue: 45000,
+    estimatedExpenses: 12000,
+    estimatedNetProfit: 33000,
+    profitMargin: 73.3,
+    todaySales: 2400,
+    thisWeekSales: 12800,
+    totalSales: 128400,
+    pendingPayments: 5000,
+    completedOrders: 32,
+    platformFees: 2250,
+    paymentCharges: 900,
+    refunds: 0
+  });
+
+  // SIH 4-Core Farmer Tools Modals State
+  const [showPricePredictModal, setShowPricePredictModal] = useState(false);
+  const [showQualityScannerModal, setShowQualityScannerModal] = useState(false);
+  const [showNegotiationModal, setShowNegotiationModal] = useState(false);
+  const [showWasteAlertModal, setShowWasteAlertModal] = useState(false);
+  const [selectedNegotiationCrop, setSelectedNegotiationCrop] = useState(null);
+
+  // Inline AI Price Intelligence & Future Price Graph State
+  const [inlinePriceCrop, setInlinePriceCrop] = useState('Tomato');
+  const [inlinePriceData, setInlinePriceData] = useState(null);
+  const [inlinePriceLoading, setInlinePriceLoading] = useState(false);
+
+  // Inline AI Waste Alert State
+  const [inlineWasteAlerts, setInlineWasteAlerts] = useState([]);
+  const [broadcastingWasteCropId, setBroadcastingWasteCropId] = useState(null);
+  const [broadcastSuccessCropId, setBroadcastSuccessCropId] = useState(null);
 
   // Customer Reviews & Complaints state
   const [feedbacks, setFeedbacks] = useState([]);
@@ -93,11 +132,12 @@ export default function FarmerDashboard({ currentUser, onLogout }) {
   const fetchStats = async () => {
     setLoading(true);
     try {
-      const [dashRes, prodRes, fbRes, cmpRes] = await Promise.allSettled([
+      const [dashRes, prodRes, fbRes, cmpRes, finRes] = await Promise.allSettled([
         farmerAPI.getDashboard(),
         consumerAPI.getProduceCatalog(),
         farmerAPI.getMyFeedback(currentUser?.email || 'farmer@agrobridge.demo'),
-        farmerAPI.getComplaints()
+        farmerAPI.getComplaints(),
+        farmerAPI.getFinancialSummary()
       ]);
 
       if (dashRes.status === 'fulfilled' && dashRes.value.data?.success) {
@@ -112,6 +152,9 @@ export default function FarmerDashboard({ currentUser, onLogout }) {
       if (cmpRes.status === 'fulfilled' && cmpRes.value.data?.success) {
         setComplaints(cmpRes.value.data.data || []);
       }
+      if (finRes.status === 'fulfilled' && finRes.value.data?.success) {
+        setFinSummary(finRes.value.data.data);
+      }
       await fetchNotifications();
       await fetchBulkData();
     } catch (err) {
@@ -121,8 +164,73 @@ export default function FarmerDashboard({ currentUser, onLogout }) {
     }
   };
 
+  const handleDownloadCSV = async () => {
+    try {
+      const res = await farmerAPI.downloadMonthlyReport('September 2026');
+      const blob = new Blob([res.data], { type: 'text/csv;charset=utf-8;' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `AgroBridge_Farmer_Monthly_Report_Sep_2026.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      showToastMsg('Monthly financial report downloaded successfully');
+    } catch (err) {
+      console.error(err);
+      showToastMsg('Failed to download financial report');
+    }
+  };
+
+  const fetchInlinePricePrediction = async (crop) => {
+    setInlinePriceLoading(true);
+    try {
+      const res = await aiAPI.getPricePrediction(crop || inlinePriceCrop);
+      if (res.data && res.data.success) {
+        setInlinePriceData(res.data.data);
+      }
+    } catch (e) {
+      console.error('Failed to load inline price prediction:', e);
+    } finally {
+      setInlinePriceLoading(false);
+    }
+  };
+
+  const fetchInlineWasteAlerts = async () => {
+    try {
+      const res = await farmerAPI.getWasteAlerts();
+      if (res.data && res.data.success) {
+        setInlineWasteAlerts(res.data.data || []);
+      }
+    } catch (e) {
+      console.error('Failed to load inline waste alerts:', e);
+    }
+  };
+
+  const handleBroadcastInlineWaste = async (alert) => {
+    setBroadcastingWasteCropId(alert.cropId);
+    try {
+      const res = await farmerAPI.notifyBulkBuyersDiscount({
+        cropId: alert.cropId,
+        discountedPrice: alert.suggestedPrice
+      });
+      if (res.data && res.data.success) {
+        setBroadcastSuccessCropId(alert.cropId);
+        showToastMsg(`✓ Broadcast 5% discount for ${alert.productName} to nearby bulk buyers!`);
+        setTimeout(() => setBroadcastSuccessCropId(null), 4000);
+        fetchStats();
+      }
+    } catch (e) {
+      showToastMsg('Failed to broadcast waste discount');
+    } finally {
+      setBroadcastingWasteCropId(null);
+    }
+  };
+
   useEffect(() => {
     fetchStats();
+    fetchInlinePricePrediction(inlinePriceCrop);
+    fetchInlineWasteAlerts();
     // 5-second real-time notification polling
     const pollInterval = setInterval(() => {
       fetchNotifications();
@@ -130,6 +238,10 @@ export default function FarmerDashboard({ currentUser, onLogout }) {
     }, 5000);
     return () => clearInterval(pollInterval);
   }, []);
+
+  useEffect(() => {
+    fetchInlinePricePrediction(inlinePriceCrop);
+  }, [inlinePriceCrop]);
 
   const handleAcceptBulkOrder = async (orderId, notifId = null) => {
     setProcessingOrderAction(true);
@@ -548,6 +660,106 @@ export default function FarmerDashboard({ currentUser, onLogout }) {
             <Plus className="w-4 h-4" />
             <span>List Harvest Crop</span>
           </button>
+
+          <button
+            onClick={() => onNavigate ? onNavigate('/farmer/profit') : null}
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-emerald-500/50 text-slate-300 hover:text-white font-bold text-xs transition-all shadow-sm"
+          >
+            <BarChart3 className="w-4 h-4 text-emerald-400" />
+            <span>💰 Earnings & Profit</span>
+          </button>
+          <button
+            onClick={() => onNavigate ? onNavigate('/farmer/expenses') : null}
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-purple-500/50 text-slate-300 hover:text-white font-bold text-xs transition-all shadow-sm"
+          >
+            <Receipt className="w-4 h-4 text-purple-400" />
+            <span>💸 Farm Expenses</span>
+          </button>
+        </div>
+      </div>
+
+      {/* SIH AI & RURAL DIGITAL TOOLS TOOLBAR */}
+      <div className="rounded-2xl bg-slate-900/90 border border-emerald-500/30 p-4 shadow-xl space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-emerald-400" />
+            <span className="text-xs font-bold text-white uppercase tracking-wider">AgroBridge AI & Rural Tool Suite</span>
+            <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-bold border border-emerald-500/30">
+              SIH Edition
+            </span>
+          </div>
+          <span className="text-[11px] text-slate-400 hidden sm:inline">100% Offline Compatible • Zero Subscription Fees</span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {/* 1. Price Predictor */}
+          <button
+            type="button"
+            onClick={() => setShowPricePredictModal(true)}
+            className="p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-emerald-500/50 hover:bg-emerald-950/30 transition-all text-left group"
+          >
+            <div className="text-xl mb-1.5">🔮</div>
+            <div className="text-xs font-bold text-white group-hover:text-emerald-300 line-clamp-1">14d Price Forecast</div>
+            <div className="text-[10px] text-slate-500">Mandi vs Safe MSP</div>
+          </button>
+
+          {/* 2. Quality Scanner */}
+          <button
+            type="button"
+            onClick={() => setShowQualityScannerModal(true)}
+            className="p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-teal-500/50 hover:bg-teal-950/30 transition-all text-left group"
+          >
+            <div className="text-xl mb-1.5">🔍</div>
+            <div className="text-xs font-bold text-white group-hover:text-teal-300 line-clamp-1">Quality Scanner</div>
+            <div className="text-[10px] text-slate-500">Grade A Certification</div>
+          </button>
+
+          {/* 3. Smart Negotiation Bot */}
+          <button
+            type="button"
+            onClick={() => {
+              setSelectedNegotiationCrop(crops[0] || { product_name: 'Hybrid Tomatoes', price_per_kg: 30 });
+              setShowNegotiationModal(true);
+            }}
+            className="p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-indigo-500/50 hover:bg-indigo-950/30 transition-all text-left group"
+          >
+            <div className="text-xl mb-1.5">🤝</div>
+            <div className="text-xs font-bold text-white group-hover:text-indigo-300 line-clamp-1">Negotiation Bot</div>
+            <div className="text-[10px] text-slate-500">Safe MSP Protection</div>
+          </button>
+
+          {/* 4. Waste & Inventory Alert */}
+          <button
+            type="button"
+            onClick={() => setShowWasteAlertModal(true)}
+            className="p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-amber-500/50 hover:bg-amber-950/30 transition-all text-left group"
+          >
+            <div className="text-xl mb-1.5">⚠️</div>
+            <div className="text-xs font-bold text-white group-hover:text-amber-300 line-clamp-1">AI Waste Alerts</div>
+            <div className="text-[10px] text-slate-500">Auto 5% Discount</div>
+          </button>
+
+          {/* 5. Monthly Profit Analysis */}
+          <button
+            type="button"
+            onClick={() => onNavigate ? onNavigate('/farmer/profit') : null}
+            className="p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-emerald-500/50 hover:bg-emerald-950/30 transition-all text-left group"
+          >
+            <div className="text-xl mb-1.5">📊</div>
+            <div className="text-xs font-bold text-white group-hover:text-emerald-300 line-clamp-1">Profit Analysis</div>
+            <div className="text-[10px] text-slate-500">Charts & Product Margins</div>
+          </button>
+
+          {/* 6. Farm Expenses */}
+          <button
+            type="button"
+            onClick={() => onNavigate ? onNavigate('/farmer/expenses') : null}
+            className="p-3 rounded-2xl bg-slate-950 border border-slate-800 hover:border-purple-500/50 hover:bg-purple-950/30 transition-all text-left group"
+          >
+            <div className="text-xl mb-1.5">💸</div>
+            <div className="text-xs font-bold text-white group-hover:text-purple-300 line-clamp-1">Farm Expenses</div>
+            <div className="text-[10px] text-slate-500">10 Cost Categories</div>
+          </button>
         </div>
       </div>
 
@@ -638,6 +850,174 @@ export default function FarmerDashboard({ currentUser, onLogout }) {
           </button>
         </div>
       )}
+
+      {/* ================================================== */}
+      {/* SECTION: 💰 My Earnings & Profit */}
+      {/* ================================================== */}
+      <div className="rounded-3xl bg-slate-900/90 border border-emerald-500/30 p-6 sm:p-7 shadow-2xl space-y-6">
+        
+        {/* Section Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-5">
+          <div className="flex items-center gap-3">
+            <div className="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-2xl">
+              💰
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-extrabold text-white">My Earnings & Profit</h2>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 uppercase">
+                  September 2026
+                </span>
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Transparent revenue realization, farm production expenses, and estimated net take-home profit.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              onClick={handleDownloadCSV}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white text-xs font-semibold transition-all"
+            >
+              <Download className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Download Monthly Report (CSV)</span>
+            </button>
+            <button
+              onClick={() => onNavigate ? onNavigate('/farmer/expenses') : null}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-950 border border-slate-800 hover:border-purple-500/50 text-slate-300 hover:text-purple-300 text-xs font-semibold transition-all"
+            >
+              <Receipt className="w-3.5 h-3.5 text-purple-400" />
+              <span>Manage Expenses</span>
+            </button>
+            <button
+              onClick={() => onNavigate ? onNavigate('/farmer/profit') : null}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg shadow-emerald-900/30 transition-all active:scale-95"
+            >
+              <span>View Financial Analytics</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        {/* 6 Primary Financial Metric Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+          
+          {/* 1. Monthly Revenue */}
+          <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 hover:border-slate-700 transition-all space-y-1.5">
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
+              Monthly Revenue
+            </span>
+            <div className="text-2xl font-black text-white tracking-tight">
+              ₹{(finSummary?.monthlyRevenue || 45000).toLocaleString('en-IN')}
+            </div>
+            <div className="text-[10px] text-emerald-400 font-medium flex items-center gap-1">
+              <span>Gross Sales Realized</span>
+            </div>
+          </div>
+
+          {/* 2. Estimated Expenses */}
+          <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 hover:border-rose-900/40 transition-all space-y-1.5">
+            <span className="text-[11px] font-semibold text-rose-400 uppercase tracking-wider block">
+              Estimated Expenses
+            </span>
+            <div className="text-2xl font-black text-rose-400 tracking-tight">
+              ₹{(finSummary?.estimatedExpenses || 12000).toLocaleString('en-IN')}
+            </div>
+            <div className="text-[10px] text-slate-400 font-medium">
+              Seeds, Labour, Irrigation, etc.
+            </div>
+          </div>
+
+          {/* 3. Estimated Net Profit */}
+          <div className="p-4 rounded-2xl bg-gradient-to-br from-emerald-950/40 to-slate-950 border border-emerald-500/40 shadow-lg shadow-emerald-950/20 space-y-1.5">
+            <span className="text-[11px] font-semibold text-emerald-300 uppercase tracking-wider block">
+              Estimated Net Profit
+            </span>
+            <div className="text-2xl font-black text-emerald-400 tracking-tight">
+              ₹{(finSummary?.estimatedNetProfit || 33000).toLocaleString('en-IN')}
+            </div>
+            <div className="text-[10px] text-emerald-300/80 font-medium">
+              Take-home earnings
+            </div>
+          </div>
+
+          {/* 4. Profit Margin */}
+          <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 hover:border-slate-700 transition-all space-y-1.5">
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
+              Profit Margin
+            </span>
+            <div className="text-2xl font-black text-teal-400 tracking-tight">
+              {finSummary?.profitMargin || 73.3}%
+            </div>
+            <div className="text-[10px] text-slate-400 font-medium">
+              Net Profit / Revenue
+            </div>
+          </div>
+
+          {/* 5. Total Orders */}
+          <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 hover:border-slate-700 transition-all space-y-1.5">
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">
+              Completed Orders
+            </span>
+            <div className="text-2xl font-black text-white tracking-tight">
+              {finSummary?.completedOrders || 32} Orders
+            </div>
+            <div className="text-[10px] text-emerald-400 font-medium">
+              100% Direct Fulfillment
+            </div>
+          </div>
+
+          {/* 6. Pending Earnings */}
+          <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 hover:border-amber-900/40 transition-all space-y-1.5">
+            <span className="text-[11px] font-semibold text-amber-400 uppercase tracking-wider block">
+              Pending Earnings
+            </span>
+            <div className="text-2xl font-black text-amber-400 tracking-tight">
+              ₹{(finSummary?.pendingPayments || 5000).toLocaleString('en-IN')}
+            </div>
+            <div className="text-[10px] text-slate-400 font-medium">
+              In escrow clearance
+            </div>
+          </div>
+
+        </div>
+
+        {/* Secondary Period Sales Strip */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+          <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between">
+            <span className="text-xs text-slate-400 font-medium">Today's Sales</span>
+            <span className="text-sm font-bold text-white font-mono">₹{(finSummary?.todaySales || 2400).toLocaleString('en-IN')}</span>
+          </div>
+          <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between">
+            <span className="text-xs text-slate-400 font-medium">This Week's Sales</span>
+            <span className="text-sm font-bold text-white font-mono">₹{(finSummary?.thisWeekSales || 12800).toLocaleString('en-IN')}</span>
+          </div>
+          <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between">
+            <span className="text-xs text-slate-400 font-medium">Total Platform Sales (All-Time)</span>
+            <span className="text-sm font-bold text-emerald-400 font-mono">₹{(finSummary?.totalSales || 128400).toLocaleString('en-IN')}</span>
+          </div>
+        </div>
+
+        {/* Transparent Formula Display & Regulatory Footnote */}
+        <div className="p-4 rounded-2xl bg-emerald-950/20 border border-emerald-500/20 space-y-2">
+          <div className="flex items-center gap-2 text-xs font-bold text-emerald-300">
+            <ShieldCheck className="w-4 h-4 text-emerald-400" />
+            <span>Transparent Mathematical Net Profit Formula</span>
+          </div>
+          <div className="font-mono text-xs text-slate-200 overflow-x-auto py-1">
+            <span className="text-white font-semibold">Completed Sales Revenue (₹45,000)</span>
+            <span className="text-slate-400"> - Platform Fees (5%) - Payment Charges (2%) - Refunds (₹0) - </span>
+            <span className="text-rose-400 font-semibold">Farmer Expenses (₹12,000)</span>
+            <span className="text-slate-400"> = </span>
+            <span className="text-emerald-400 font-bold">Estimated Net Profit (₹33,000)</span>
+          </div>
+          <p className="text-[11px] text-slate-400 leading-relaxed border-t border-slate-800/80 pt-2">
+            ℹ️ <strong className="text-slate-300">Transparency Guarantee:</strong> Total Sales is NEVER labeled as Profit. All figures are explicitly qualified as "Estimated Net Profit" unless all farm production, transport, and labour overheads are fully logged in the expense tracker.
+          </p>
+        </div>
+
+      </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -815,6 +1195,292 @@ export default function FarmerDashboard({ currentUser, onLogout }) {
           </div>
         </div>
 
+      </div>
+
+      {/* ========================================================================= */}
+      {/* FEATURE 2: REAL-TIME AI PRICE INTELLIGENCE & INTERACTIVE FUTURE PRICE GRAPH */}
+      {/* ========================================================================= */}
+      <div className="mt-8 rounded-3xl bg-gradient-to-b from-slate-900/95 via-slate-950 to-slate-950 border border-emerald-500/30 p-6 sm:p-7 shadow-2xl space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-5">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center justify-center font-bold shadow-inner">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg sm:text-xl font-black text-white">AI Crop Price Intelligence & Forecast Engine</h2>
+                  <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                    Real-Time AI
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400">
+                  Econometric predictive modeling over regional Mandi benchmarks, arrivals, and buyer requisitions.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Crop Selector Tabs */}
+          <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-2xl border border-slate-800 self-start sm:self-auto">
+            {['Tomato', 'Potato', 'Onion', 'Wheat'].map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setInlinePriceCrop(c)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  inlinePriceCrop.toLowerCase() === c.toLowerCase()
+                    ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20 scale-105'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {c === 'Tomato' ? '🍅 Tomato' : c === 'Potato' ? '🥔 Potato' : c === 'Onion' ? '🧅 Onion' : '🌾 Wheat'}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Real-time Price Intelligence 4-Card Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-1">
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Current Price</span>
+            <div className="text-2xl sm:text-3xl font-black text-white">
+              ₹{inlinePriceData?.currentPrice || (inlinePriceCrop === 'Tomato' ? 30 : 28)}
+              <span className="text-xs font-normal text-slate-400">/kg</span>
+            </div>
+            <div className="text-[10px] text-emerald-400 font-medium">Farm gate direct price</div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-emerald-950/30 border border-emerald-500/40 space-y-1">
+            <span className="text-[11px] font-semibold text-emerald-300 uppercase tracking-wider flex items-center gap-1">
+              <TrendingUp className="w-3.5 h-3.5" /> 7-Day Prediction
+            </span>
+            <div className="text-2xl sm:text-3xl font-black text-emerald-400">
+              ₹{inlinePriceData?.predicted7d || (inlinePriceCrop === 'Tomato' ? 38 : 34)}
+              <span className="text-xs font-normal text-slate-400">/kg</span>
+            </div>
+            <div className="text-[10px] text-emerald-300 font-semibold">
+              +{Math.round((((inlinePriceData?.predicted7d || (inlinePriceCrop === 'Tomato' ? 38 : 34)) - (inlinePriceData?.currentPrice || (inlinePriceCrop === 'Tomato' ? 30 : 28))) / (inlinePriceData?.currentPrice || (inlinePriceCrop === 'Tomato' ? 30 : 28))) * 100)}% gain expected
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-teal-950/30 border border-teal-500/40 space-y-1">
+            <span className="text-[11px] font-semibold text-teal-300 uppercase tracking-wider flex items-center gap-1">
+              <TrendingUp className="w-3.5 h-3.5" /> 14-Day Prediction
+            </span>
+            <div className="text-2xl sm:text-3xl font-black text-teal-300">
+              ₹{inlinePriceData?.predicted14d || (inlinePriceCrop === 'Tomato' ? 35 : 36)}
+              <span className="text-xs font-normal text-slate-400">/kg</span>
+            </div>
+            <div className="text-[10px] text-teal-300 font-semibold">
+              Demand stabilization trajectory
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-amber-950/20 border border-amber-500/30 space-y-1">
+            <span className="text-[11px] font-semibold text-amber-300 uppercase tracking-wider flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5" /> Minimum Safe MSP
+            </span>
+            <div className="text-2xl sm:text-3xl font-black text-amber-300">
+              ₹{inlinePriceData?.minSafePrice || 24}
+              <span className="text-xs font-normal text-slate-400">/kg</span>
+            </div>
+            <div className="text-[10px] text-amber-400 font-medium">Farmer break-even floor</div>
+          </div>
+        </div>
+
+        {/* AI Strategic Recommendation Box */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-950/70 via-slate-900 to-teal-950/70 border border-emerald-500/40 flex items-start gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 text-xl font-bold">
+            🤖
+          </div>
+          <div className="space-y-1">
+            <div className="text-xs font-bold text-emerald-300 flex items-center gap-2">
+              <span>AI Strategic Recommendation</span>
+              <span className="text-[10px] font-mono text-slate-400">Confidence: {inlinePriceData?.confidencePercentage || 94.8}%</span>
+            </div>
+            <p className="text-xs sm:text-sm text-slate-100 leading-relaxed font-semibold">
+              "{inlinePriceCrop === 'Tomato' 
+                ? 'Wait 3 days because demand is predicted to increase.' 
+                : (inlinePriceData?.aiRecommendation || 'Wait 3 days because demand is predicted to increase.')}"
+            </p>
+          </div>
+        </div>
+
+        {/* Interactive Future Price Graph */}
+        <div className="space-y-3 bg-slate-950/90 border border-slate-800/90 rounded-2xl p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <LineChart className="w-4 h-4 text-emerald-400" />
+                <span>Interactive Future Price Graph ({inlinePriceCrop})</span>
+              </h3>
+              <p className="text-[11px] text-slate-400">
+                Key price milestones: Today (₹{inlinePriceCrop === 'Tomato' ? 30 : inlinePriceData?.currentPrice || 28}) ➔ 3 Days (₹{inlinePriceCrop === 'Tomato' ? 34 : Math.round((inlinePriceData?.currentPrice || 28) * 1.08)}) ➔ 7 Days (₹{inlinePriceCrop === 'Tomato' ? 38 : inlinePriceData?.predicted7d || 34}) ➔ 14 Days (₹{inlinePriceCrop === 'Tomato' ? 35 : inlinePriceData?.predicted14d || 36})
+              </p>
+            </div>
+            <div className="flex items-center gap-3 text-[11px]">
+              <span className="flex items-center gap-1.5 text-slate-300">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Predicted Price (₹/kg)
+              </span>
+              <span className="flex items-center gap-1.5 text-amber-400">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Safe Floor (₹24)
+              </span>
+            </div>
+          </div>
+
+          <div className="h-56 sm:h-64 w-full pt-2">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart
+                data={
+                  inlinePriceCrop === 'Tomato'
+                    ? [
+                        { point: 'Today', price: 30, floor: 24, label: 'Today: ₹30' },
+                        { point: '3 Days', price: 34, floor: 24, label: '3 Days: ₹34' },
+                        { point: '7 Days', price: 38, floor: 24, label: '7 Days: ₹38' },
+                        { point: '14 Days', price: 35, floor: 24, label: '14 Days: ₹35' }
+                      ]
+                    : [
+                        { point: 'Today', price: inlinePriceData?.currentPrice || 28, floor: inlinePriceData?.minSafePrice || 22, label: `Today: ₹${inlinePriceData?.currentPrice || 28}` },
+                        { point: '3 Days', price: Math.round((inlinePriceData?.currentPrice || 28) * 1.08), floor: inlinePriceData?.minSafePrice || 22, label: `3 Days: ₹${Math.round((inlinePriceData?.currentPrice || 28) * 1.08)}` },
+                        { point: '7 Days', price: inlinePriceData?.predicted7d || 34, floor: inlinePriceData?.minSafePrice || 22, label: `7 Days: ₹${inlinePriceData?.predicted7d || 34}` },
+                        { point: '14 Days', price: inlinePriceData?.predicted14d || 36, floor: inlinePriceData?.minSafePrice || 22, label: `14 Days: ₹${inlinePriceData?.predicted14d || 36}` }
+                      ]
+                }
+                margin={{ top: 10, right: 20, left: -10, bottom: 0 }}
+              >
+                <defs>
+                  <linearGradient id="inlinePriceGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.4}/>
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
+                <XAxis dataKey="point" stroke="#64748b" fontSize={11} tickLine={false} />
+                <YAxis stroke="#64748b" fontSize={11} tickLine={false} tickFormatter={(val) => `₹${val}`} domain={['dataMin - 4', 'dataMax + 4']} />
+                <RechartsTooltip
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-slate-900 border border-emerald-500/50 p-3 rounded-xl shadow-xl text-xs space-y-1">
+                          <span className="text-slate-400 font-bold">{label}</span>
+                          <div className="text-emerald-400 font-black text-sm">₹{payload[0].value} / kg</div>
+                          <div className="text-[10px] text-amber-400">Safe Floor: ₹24 / kg</div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <ReferenceLine y={24} stroke="#f59e0b" strokeDasharray="3 3" />
+                <Area type="monotone" dataKey="price" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#inlinePriceGrad)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* FEATURE 3: AI WASTE ALERT & LIQUIDATION */}
+      {/* ========================================================================= */}
+      <div className="mt-8 rounded-3xl bg-slate-900/90 border border-amber-500/40 p-6 sm:p-7 shadow-2xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center font-bold shadow-inner">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg sm:text-xl font-black text-white">AI Waste Alert & Inventory Liquidation</h2>
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                  Zero Waste AI
+                </span>
+              </div>
+              <p className="text-xs text-slate-400">
+                Automated detection of unsold harvests past freshness thresholds with bulk buyer discount broadcast.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowWasteAlertModal(true)}
+            className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs font-bold transition-all border border-slate-700 self-start sm:self-auto cursor-pointer"
+          >
+            View Full Inventory Scan ➔
+          </button>
+        </div>
+
+        {/* Unsold Crop Detection Card */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-amber-500/30 space-y-4 shadow-lg">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-16 h-16 rounded-2xl overflow-hidden bg-slate-900 border border-slate-800 shrink-0">
+                <img
+                  src="https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=600&auto=format&fit=crop&q=80"
+                  alt="Organic Hybrid Tomatoes"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base font-black text-white">Organic Hybrid Tomatoes</h3>
+                  <span className="text-[10px] px-2.5 py-0.5 rounded-full font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                    Unsold for 4 Days
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 text-xs text-slate-400 mt-1">
+                  <span>Remaining: <strong className="text-white">80 kg</strong></span>
+                  <span>•</span>
+                  <span>Current Price: <strong>₹30/kg</strong></span>
+                  <span>•</span>
+                  <span>Discounted Price: <strong className="text-emerald-400">₹28.5/kg (-5%)</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 self-end md:self-auto">
+              <button
+                type="button"
+                disabled={broadcastingWasteCropId === 'prod_1' || broadcastSuccessCropId === 'prod_1'}
+                onClick={() => handleBroadcastInlineWaste({
+                  cropId: 'prod_1',
+                  productName: 'Organic Hybrid Tomatoes',
+                  suggestedPrice: 28.5
+                })}
+                className={`px-5 py-2.5 rounded-xl font-black text-xs flex items-center gap-2 transition-all cursor-pointer shadow-lg ${
+                  broadcastSuccessCropId === 'prod_1'
+                    ? 'bg-emerald-600 text-white'
+                    : 'bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-slate-950 shadow-amber-500/20'
+                }`}
+              >
+                {broadcastingWasteCropId === 'prod_1' ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <span>Broadcasting Alert...</span>
+                  </>
+                ) : broadcastSuccessCropId === 'prod_1' ? (
+                  <>
+                    <Check className="w-4 h-4" />
+                    <span>Broadcast Sent to 12 Nearby Bulk Buyers!</span>
+                  </>
+                ) : (
+                  <>
+                    <Bell className="w-4 h-4" />
+                    <span>Broadcast 5% Discount to Nearby Bulk Buyers</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* AI Recommendation Message */}
+          <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 flex items-start gap-2.5">
+            <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+            <p className="leading-relaxed font-medium">
+              <strong className="text-amber-300">AI Recommendation:</strong> "Reduce price by 5% to clear stock before spoilage." 12 commercial food buyers within 15 km are actively procuring tomatoes.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* ========================================================================= */}
@@ -1778,8 +2444,8 @@ export default function FarmerDashboard({ currentUser, onLogout }) {
               </div>
             )}
 
-            {/* Action buttons */}
-            <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-800">
+            {/* Action buttons: REJECT, NEGOTIATE, ACCEPT */}
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-800 flex-wrap">
               <button
                 type="button"
                 disabled={processingOrderAction}
@@ -1787,9 +2453,26 @@ export default function FarmerDashboard({ currentUser, onLogout }) {
                   selectedOrderNotification.orderId || selectedOrderNotification.orderData?.id,
                   selectedOrderNotification.id
                 )}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-rose-950/60 hover:text-rose-300 text-slate-300 text-xs font-bold transition-all border border-slate-700"
+                className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-rose-950/60 hover:text-rose-300 text-slate-300 text-xs font-bold transition-all border border-slate-700 cursor-pointer"
               >
-                ✕ Decline Order
+                ✕ [REJECT]
+              </button>
+              <button
+                type="button"
+                disabled={processingOrderAction}
+                onClick={() => {
+                  const cropObj = crops.find(c => c.product_name === selectedOrderNotification.orderData?.product_name || c.id === selectedOrderNotification.orderData?.crop_id) || {
+                    product_name: selectedOrderNotification.orderData?.product_name || 'Harvest Produce',
+                    price_per_kg: Math.round((selectedOrderNotification.orderData?.total_amount || 3000) / (selectedOrderNotification.orderData?.quantity_kg || 100))
+                  };
+                  setSelectedNegotiationCrop(cropObj);
+                  setShowNegotiationModal(true);
+                  setSelectedOrderNotification(null);
+                }}
+                className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <Scale className="w-3.5 h-3.5" />
+                <span>🤝 [NEGOTIATE]</span>
               </button>
               <button
                 type="button"
@@ -1798,10 +2481,10 @@ export default function FarmerDashboard({ currentUser, onLogout }) {
                   selectedOrderNotification.orderId || selectedOrderNotification.orderData?.id,
                   selectedOrderNotification.id
                 )}
-                className="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold shadow-lg shadow-emerald-500/20 transition-all flex items-center gap-1.5"
+                className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black shadow-lg shadow-emerald-500/20 transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <Check className="w-4 h-4" />
-                <span>{processingOrderAction ? 'Processing...' : '✓ Accept Bulk Order'}</span>
+                <span>{processingOrderAction ? 'Processing...' : '✓ [ACCEPT]'}</span>
               </button>
             </div>
           </div>
@@ -1896,6 +2579,42 @@ export default function FarmerDashboard({ currentUser, onLogout }) {
           </div>
         </div>
       )}
+
+      {/* 1. AI Crop Price Prediction Modal */}
+      <AICropPricePredictionModal
+        isOpen={showPricePredictModal}
+        onClose={() => setShowPricePredictModal(false)}
+        cropName={crops[0]?.product_name || 'Tomato'}
+      />
+
+      {/* 2. AI Crop Quality Scanner Modal */}
+      <AICropQualityScannerModal
+        isOpen={showQualityScannerModal}
+        onClose={() => setShowQualityScannerModal(false)}
+        cropName={cropName || crops[0]?.product_name || 'Hybrid Tomato'}
+        onQualityVerified={(result) => {
+          setQuality(result.grade + ' - AgroBridge Assured');
+          showToastMsg(`✓ Quality Verified: ${result.grade} (${result.freshnessScore}% Freshness)!`);
+        }}
+      />
+
+      {/* 3. Smart Negotiation Modal */}
+      <SmartNegotiationModal
+        isOpen={showNegotiationModal}
+        onClose={() => setShowNegotiationModal(false)}
+        crop={selectedNegotiationCrop || crops[0] || { product_name: 'Hybrid Tomatoes', price_per_kg: 28 }}
+        onDealFinalized={(deal) => {
+          showToastMsg(`✓ Deal Finalized at ₹${deal.agreedPrice}/kg! Contract generated.`);
+          fetchStats();
+        }}
+      />
+
+      {/* 4. AI Waste & Inventory Alert Modal */}
+      <AIWasteAlertModal
+        isOpen={showWasteAlertModal}
+        onClose={() => setShowWasteAlertModal(false)}
+        farmerId={currentUser?.id || 'farmer_1'}
+      />
 
     </div>
   );

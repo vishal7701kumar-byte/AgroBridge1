@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { protect, authorize } = require('../middleware/authMiddleware');
 const dataService = require('../services/dataService');
+const financialService = require('../services/financialService');
 
 // All routes under /api/farmer/* require authentication and FARMER role
 router.use(protect);
@@ -40,6 +41,128 @@ router.get('/dashboard-stats', (req, res) => {
       ]
     }
   });
+});
+
+// SIH Feature 9: Waste Reduction Alerts
+router.get('/waste-alerts', (req, res) => {
+  const farmerId = req.user?.email || 'farmer@agrobridge.demo';
+  const alerts = dataService.getWasteAlerts(farmerId);
+  res.json({ success: true, data: alerts });
+});
+
+router.post('/notify-bulk-buyers', (req, res) => {
+  const { cropId, discountedPrice } = req.body;
+  const farmerId = req.user?.email || 'farmer@agrobridge.demo';
+  const result = dataService.notifyBulkBuyersDiscount({ cropId, farmerId, discountedPrice });
+  res.json({ success: true, data: result });
+});
+
+// =============================================================================
+// FARMER FINANCIAL ANALYTICS & EXPENSE MANAGEMENT APIS
+// =============================================================================
+
+// GET /api/farmer/financial-summary
+router.get('/financial-summary', (req, res) => {
+  try {
+    const farmerId = req.user?.email || 'farmer@agrobridge.demo';
+    const summary = financialService.getFarmerFinancialSummary(farmerId);
+    res.json({ success: true, data: summary });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET /api/farmer/monthly-profit
+router.get('/monthly-profit', (req, res) => {
+  try {
+    const farmerId = req.user?.email || 'farmer@agrobridge.demo';
+    const filter = req.query.filter || '3-months';
+    const profitData = financialService.getFarmerMonthlyProfit(farmerId, filter);
+    res.json({ success: true, data: profitData });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET /api/farmer/product-profit
+router.get('/product-profit', (req, res) => {
+  try {
+    const farmerId = req.user?.email || 'farmer@agrobridge.demo';
+    const productProfit = financialService.getFarmerProductProfit(farmerId);
+    res.json({ success: true, data: productProfit });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET /api/farmer/expenses
+router.get('/expenses', (req, res) => {
+  try {
+    const farmerId = req.user?.email || 'farmer@agrobridge.demo';
+    const expenses = financialService.getFarmerExpenses(farmerId, req.query);
+    res.json(expenses);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST /api/farmer/expenses
+router.post('/expenses', (req, res) => {
+  try {
+    const farmerId = req.user?.email || 'farmer@agrobridge.demo';
+    const { expenseName, category, amount, date, notes } = req.body;
+
+    if (!expenseName || amount === undefined || isNaN(amount)) {
+      return res.status(400).json({ success: false, error: 'Expense name and valid amount are required' });
+    }
+
+    const created = financialService.addFarmerExpense(farmerId, { expenseName, category, amount, date, notes });
+    res.status(201).json({ success: true, message: 'Expense added successfully', data: created });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// PUT /api/farmer/expenses/:id
+router.put('/expenses/:id', (req, res) => {
+  try {
+    const farmerId = req.user?.email || 'farmer@agrobridge.demo';
+    const updated = financialService.updateFarmerExpense(farmerId, req.params.id, req.body);
+    if (!updated) {
+      return res.status(404).json({ success: false, error: 'Expense not found or unauthorized' });
+    }
+    res.json({ success: true, message: 'Expense updated successfully', data: updated });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// DELETE /api/farmer/expenses/:id
+router.delete('/expenses/:id', (req, res) => {
+  try {
+    const farmerId = req.user?.email || 'farmer@agrobridge.demo';
+    const deleted = financialService.deleteFarmerExpense(farmerId, req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ success: false, error: 'Expense not found or unauthorized' });
+    }
+    res.json({ success: true, message: 'Expense deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET /api/farmer/report/csv
+router.get('/report/csv', (req, res) => {
+  try {
+    const farmerId = req.user?.email || 'farmer@agrobridge.demo';
+    const month = req.query.month || 'September 2026';
+    const csvContent = financialService.generateFarmerFinancialReportCSV(farmerId, month);
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="AgroBridge_Farmer_Report_${month.replace(/\s+/g, '_')}.csv"`);
+    res.send(csvContent);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 module.exports = router;

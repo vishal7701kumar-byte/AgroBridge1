@@ -3,6 +3,7 @@ const router = express.Router();
 const { protect, authorize } = require('../middleware/authMiddleware');
 const userService = require('../services/userService');
 const dataService = require('../services/dataService');
+const financialService = require('../services/financialService');
 
 // All routes under /api/admin/* require authentication and ADMIN role
 router.use(protect);
@@ -225,6 +226,174 @@ router.get('/audit-logs', (req, res, next) => {
     });
   } catch (err) {
     next(err);
+  }
+});
+
+// =============================================================================
+// ADMIN PLATFORM REVENUE & FINANCIAL ANALYTICS APIS
+// =============================================================================
+
+// GET /api/admin/revenue-summary
+router.get('/revenue-summary', (req, res) => {
+  try {
+    const summary = financialService.getAdminRevenueSummary();
+    res.json({ success: true, data: summary });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET /api/admin/revenue-trend
+router.get('/revenue-trend', (req, res) => {
+  try {
+    const filter = req.query.filter || '3-months';
+    const trend = financialService.getAdminRevenueTrend(filter);
+    res.json({ success: true, data: trend });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET /api/admin/revenue-by-category
+router.get('/revenue-by-category', (req, res) => {
+  try {
+    const categories = financialService.getAdminRevenueByCategory();
+    res.json({ success: true, data: categories });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET /api/admin/revenue-by-user-type
+router.get('/revenue-by-user-type', (req, res) => {
+  try {
+    const userTypes = financialService.getAdminRevenueByUserType();
+    res.json({ success: true, data: userTypes });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET /api/admin/top-farmers
+router.get('/top-farmers', (req, res) => {
+  try {
+    const farmers = financialService.getAdminTopFarmers();
+    res.json({ success: true, data: farmers });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET /api/admin/top-products
+router.get('/top-products', (req, res) => {
+  try {
+    const products = financialService.getAdminTopProducts();
+    res.json({ success: true, data: products });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET /api/admin/delivery-financials
+router.get('/delivery-financials', (req, res) => {
+  try {
+    const delivery = financialService.getAdminDeliveryFinancials();
+    res.json({ success: true, data: delivery });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET /api/admin/refund-analytics
+router.get('/refund-analytics', (req, res) => {
+  try {
+    const refunds = financialService.getAdminRefundAnalytics();
+    res.json({ success: true, data: refunds });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET /api/admin/expenses (Operating Costs)
+router.get('/expenses', (req, res) => {
+  try {
+    const expenses = financialService.getPlatformExpenses(req.query);
+    res.json(expenses);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST /api/admin/expenses
+router.post('/expenses', (req, res) => {
+  try {
+    const { expenseName, category, amount, date, notes } = req.body;
+    if (!expenseName || amount === undefined || isNaN(amount)) {
+      return res.status(400).json({ success: false, error: 'Expense name and valid amount are required' });
+    }
+    const created = financialService.addPlatformExpense({ expenseName, category, amount, date, notes });
+    res.status(201).json({ success: true, message: 'Platform expense recorded', data: created });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// PUT /api/admin/expenses/:id
+router.put('/expenses/:id', (req, res) => {
+  try {
+    const updated = financialService.updatePlatformExpense(req.params.id, req.body);
+    if (!updated) {
+      return res.status(404).json({ success: false, error: 'Platform expense not found' });
+    }
+    res.json({ success: true, message: 'Platform expense updated', data: updated });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// DELETE /api/admin/expenses/:id
+router.delete('/expenses/:id', (req, res) => {
+  try {
+    const deleted = financialService.deletePlatformExpense(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ success: false, error: 'Platform expense not found' });
+    }
+    res.json({ success: true, message: 'Platform expense removed' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET /api/admin/revenue/transactions
+router.get('/revenue/transactions', (req, res) => {
+  try {
+    const transactions = financialService.getAdminTransactions(req.query);
+    res.json(transactions);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET /api/admin/report/csv
+router.get('/report/csv', (req, res) => {
+  try {
+    const period = req.query.period || 'September 2026';
+    const csvContent = financialService.generateAdminRevenueReportCSV(period);
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="AgroBridge_Platform_Revenue_Report_${period.replace(/\s+/g, '_')}.csv"`);
+    res.send(csvContent);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET /api/admin/ai-insights
+router.get('/ai-insights', (req, res) => {
+  try {
+    const insights = financialService.getAdminAIInsights();
+    res.json({ success: true, data: insights });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 

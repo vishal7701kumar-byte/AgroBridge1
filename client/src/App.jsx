@@ -15,6 +15,12 @@ import OrderTrackingPage from './pages/OrderTrackingPage';
 import OrderFeedbackPage from './pages/OrderFeedbackPage';
 import ConsumerSupportPage from './pages/ConsumerSupportPage';
 import LandingPage from './pages/LandingPage';
+import FarmerExpensesPage from './pages/FarmerExpensesPage';
+import FarmerProfitPage from './pages/FarmerProfitPage';
+import AdminRevenuePage from './pages/AdminRevenuePage';
+import AdminExpensesPage from './pages/AdminExpensesPage';
+import AdminTransactionsPage from './pages/AdminTransactionsPage';
+import AgroBridgeAIChatbot from './components/AgroBridgeAIChatbot';
 import { Key, X, Check, ArrowRight } from 'lucide-react';
 
 const ROLE_CONFIGS = {
@@ -203,6 +209,96 @@ export default function App() {
       return <ProductDetailsPage currentRoute={currentRoute} onNavigate={navigate} />;
     }
 
+    // Farmer Expenses Route: /farmer/expenses
+    if (currentRoute === '/farmer/expenses') {
+      if (!currentUser) {
+        return <RoleLoginPage roleConfig={ROLE_CONFIGS.FARMER} onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />;
+      }
+      if (currentUser.role !== 'FARMER') {
+        return (
+          <UnauthorizedAccessCard
+            requiredRole="Farmer"
+            userRole={currentUser.role}
+            correctLoginRoute="/farmer/login"
+            onNavigate={navigate}
+          />
+        );
+      }
+      return <FarmerExpensesPage currentUser={currentUser} onNavigate={navigate} onLogout={handleLogout} />;
+    }
+
+    // Farmer Profit Analysis Route: /farmer/profit
+    if (currentRoute === '/farmer/profit') {
+      if (!currentUser) {
+        return <RoleLoginPage roleConfig={ROLE_CONFIGS.FARMER} onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />;
+      }
+      if (currentUser.role !== 'FARMER') {
+        return (
+          <UnauthorizedAccessCard
+            requiredRole="Farmer"
+            userRole={currentUser.role}
+            correctLoginRoute="/farmer/login"
+            onNavigate={navigate}
+          />
+        );
+      }
+      return <FarmerProfitPage currentUser={currentUser} onNavigate={navigate} onLogout={handleLogout} />;
+    }
+
+    // Admin Revenue Analytics Route: /admin/revenue
+    if (currentRoute === '/admin/revenue') {
+      if (!currentUser) {
+        return <RoleLoginPage roleConfig={ROLE_CONFIGS.ADMIN} onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />;
+      }
+      if (currentUser.role !== 'ADMIN') {
+        return (
+          <UnauthorizedAccessCard
+            requiredRole="Admin"
+            userRole={currentUser.role}
+            correctLoginRoute="/admin/login"
+            onNavigate={navigate}
+          />
+        );
+      }
+      return <AdminRevenuePage currentUser={currentUser} onNavigate={navigate} onLogout={handleLogout} />;
+    }
+
+    // Admin Expenses (Operating Costs) Route: /admin/expenses
+    if (currentRoute === '/admin/expenses') {
+      if (!currentUser) {
+        return <RoleLoginPage roleConfig={ROLE_CONFIGS.ADMIN} onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />;
+      }
+      if (currentUser.role !== 'ADMIN') {
+        return (
+          <UnauthorizedAccessCard
+            requiredRole="Admin"
+            userRole={currentUser.role}
+            correctLoginRoute="/admin/login"
+            onNavigate={navigate}
+          />
+        );
+      }
+      return <AdminExpensesPage currentUser={currentUser} onNavigate={navigate} onLogout={handleLogout} />;
+    }
+
+    // Admin Transactions Ledger Route: /admin/revenue/transactions or /admin/transactions
+    if (currentRoute === '/admin/revenue/transactions' || currentRoute === '/admin/transactions') {
+      if (!currentUser) {
+        return <RoleLoginPage roleConfig={ROLE_CONFIGS.ADMIN} onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />;
+      }
+      if (currentUser.role !== 'ADMIN') {
+        return (
+          <UnauthorizedAccessCard
+            requiredRole="Admin"
+            userRole={currentUser.role}
+            correctLoginRoute="/admin/login"
+            onNavigate={navigate}
+          />
+        );
+      }
+      return <AdminTransactionsPage currentUser={currentUser} onNavigate={navigate} onLogout={handleLogout} />;
+    }
+
     const isBulkBuyerRoute = currentRoute.startsWith('/bulk-buyer/') && !currentRoute.includes('/login') && !currentRoute.includes('/register');
     const isAdminRoute = (currentRoute.startsWith('/admin/') || currentRoute === '/admin') && !currentRoute.includes('/login');
     const isDashboard = currentRoute.includes('/dashboard') || isBulkBuyerRoute || isAdminRoute;
@@ -273,7 +369,7 @@ export default function App() {
       // Render authorized dashboard
       switch (currentUser.role) {
         case 'FARMER':
-          return <FarmerDashboard currentUser={currentUser} onLogout={handleLogout} />;
+          return <FarmerDashboard currentUser={currentUser} onLogout={handleLogout} onNavigate={navigate} />;
         case 'CONSUMER':
           return <ConsumerDashboard currentUser={currentUser} onLogout={handleLogout} onNavigate={navigate} />;
         case 'BULK_BUYER':
@@ -376,6 +472,9 @@ export default function App() {
           </div>
         </footer>
       )}
+
+      {/* Global Multilingual AI Assistant Widget */}
+      <AgroBridgeAIChatbot />
 
     </div>
   );

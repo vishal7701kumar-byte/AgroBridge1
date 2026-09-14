@@ -4,7 +4,8 @@ import {
   ShoppingBag, Truck, FileText, ShieldCheck, LifeBuoy, AlertTriangle, 
   Check, X, Star, ThumbsUp, MessageSquare, AlertCircle, Eye, AlertOctagon,
   HelpCircle, History, Sparkles, Filter, ChevronRight, MessageCircle, Ban,
-  Clock, Search, Calendar, ShieldX, UserX, UserCheck
+  Clock, Search, Calendar, ShieldX, UserX, UserCheck, DollarSign, TrendingUp,
+  Layers, Receipt
 } from 'lucide-react';
 import { adminAPI } from '../services/api';
 import AgroProductImage, { getProductImage } from '../components/AgroProductImage';
@@ -400,13 +401,36 @@ export default function AdminDashboard({ currentUser, onLogout, onNavigate, init
           </div>
         </div>
 
-        <button
-          onClick={fetchStats}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition-colors"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-violet-400' : ''}`} />
-          <span className="text-xs font-semibold">Refresh Telemetry</span>
-        </button>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            onClick={() => onNavigate ? onNavigate('/admin/revenue') : null}
+            className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs shadow-lg shadow-emerald-900/30 transition-all active:scale-95"
+          >
+            <DollarSign className="w-4 h-4" />
+            <span>💰 Platform Revenue</span>
+          </button>
+          <button
+            onClick={() => onNavigate ? onNavigate('/admin/expenses') : null}
+            className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-purple-500 text-slate-300 hover:text-white font-bold text-xs transition-all"
+          >
+            <Receipt className="w-4 h-4 text-purple-400" />
+            <span>🛠️ Operating Costs</span>
+          </button>
+          <button
+            onClick={() => onNavigate ? onNavigate('/admin/revenue/transactions') : null}
+            className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:border-sky-500 text-slate-300 hover:text-white font-bold text-xs transition-all"
+          >
+            <FileText className="w-4 h-4 text-sky-400" />
+            <span>📑 Ledger</span>
+          </button>
+          <button
+            onClick={fetchStats}
+            className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 hover:text-white transition-colors"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-violet-400' : ''}`} />
+            <span className="text-xs font-semibold">Refresh</span>
+          </button>
+        </div>
       </div>
 
       {/* Role Distribution Counts */}
@@ -516,6 +540,27 @@ export default function AdminDashboard({ currentUser, onLogout, onNavigate, init
         >
           <Truck className="w-4 h-4" />
           <span>Deliveries ({deliveries.length})</span>
+        </button>
+        <button
+          onClick={() => onNavigate?.('/admin/revenue')}
+          className="px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shrink-0 bg-emerald-950/40 border border-emerald-800/50 text-emerald-300 hover:bg-emerald-900/60"
+        >
+          <DollarSign className="w-4 h-4 text-emerald-400" />
+          <span>💰 Platform Revenue</span>
+        </button>
+        <button
+          onClick={() => onNavigate?.('/admin/expenses')}
+          className="px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shrink-0 bg-purple-950/40 border border-purple-800/50 text-purple-300 hover:bg-purple-900/60"
+        >
+          <Receipt className="w-4 h-4 text-purple-400" />
+          <span>🛠️ Operating Costs</span>
+        </button>
+        <button
+          onClick={() => onNavigate?.('/admin/revenue/transactions')}
+          className="px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shrink-0 bg-sky-950/40 border border-sky-800/50 text-sky-300 hover:bg-sky-900/60"
+        >
+          <FileText className="w-4 h-4 text-sky-400" />
+          <span>📑 Ledger</span>
         </button>
       </div>
 

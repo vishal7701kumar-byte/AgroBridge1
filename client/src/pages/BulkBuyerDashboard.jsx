@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { bulkBuyerAPI, consumerAPI } from '../services/api';
 import AgroProductImage from '../components/AgroProductImage';
+import SmartNegotiationModal from '../components/SmartNegotiationModal';
+import AICropPricePredictionModal from '../components/AICropPricePredictionModal';
 
 export default function BulkBuyerDashboard({ currentUser, onLogout, onNavigate, initialRoute }) {
   // Navigation tabs: 'marketplace' | 'compare' | 'orders' | 'contracts'
@@ -22,6 +24,11 @@ export default function BulkBuyerDashboard({ currentUser, onLogout, onNavigate, 
   const [bulkOrders, setBulkOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
+
+  // SIH Modals State
+  const [showNegotiationModal, setShowNegotiationModal] = useState(false);
+  const [negotiationProduct, setNegotiationProduct] = useState(null);
+  const [predictionCrop, setPredictionCrop] = useState(null);
 
   // Marketplace Filter State
   // 'all' | 'assured' | 'direct' | 'nearMe' | 'bestDeals' | 'aiRecommended'
@@ -283,6 +290,9 @@ export default function BulkBuyerDashboard({ currentUser, onLogout, onNavigate, 
             <p className="text-xs sm:text-sm text-slate-400 mt-1 flex items-center gap-2">
               <Building className="w-3.5 h-3.5 text-indigo-400" />
               <span>{currentUser?.businessName || 'Mehta Agro Wholesalers & Hotel Supplies'} • <strong className="text-slate-300">{currentUser?.businessType || 'Distributor'}</strong> ({currentUser?.city || 'Bhopal'})</span>
+            </p>
+            <p className="text-[11px] text-emerald-400 font-medium mt-0.5">
+              "Better Prices for Farmers. Lower Prices for Consumers. Smarter Logistics with AI."
             </p>
           </div>
         </div>
@@ -612,25 +622,53 @@ export default function BulkBuyerDashboard({ currentUser, onLogout, onNavigate, 
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="pt-3 border-t border-slate-800 flex items-center gap-2">
-                      <button
-                        onClick={() => setProductDetailsModal(prod)}
-                        className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-colors flex items-center justify-center gap-1.5"
-                      >
-                        <Eye className="w-3.5 h-3.5 text-slate-400" />
-                        <span>View Details</span>
-                      </button>
+                    <div className="pt-3 border-t border-slate-800 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setProductDetailsModal(prod)}
+                          className="flex-1 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-colors flex items-center justify-center gap-1.5"
+                        >
+                          <Eye className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Details</span>
+                        </button>
 
-                      <button
-                        onClick={() => {
-                          setOrderModalProduct(prod);
-                          setOrderQuantityKg(moq);
-                        }}
-                        className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-md shadow-indigo-600/20 flex items-center justify-center gap-1.5"
-                      >
-                        <Package className="w-3.5 h-3.5" />
-                        <span>Request Order</span>
-                      </button>
+                        <button
+                          onClick={() => {
+                            setOrderModalProduct(prod);
+                            setOrderQuantityKg(moq);
+                          }}
+                          className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-all shadow-md shadow-indigo-600/20 flex items-center justify-center gap-1.5"
+                        >
+                          <Package className="w-3.5 h-3.5" />
+                          <span>Order ({moq}kg+)</span>
+                        </button>
+                      </div>
+
+                      {/* AI Negotiation and 14d Price Prediction Quick Buttons */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setNegotiationProduct(prod);
+                            setShowNegotiationModal(true);
+                          }}
+                          className="py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 text-[11px] font-bold transition-all flex items-center justify-center gap-1"
+                          title="Open AI Smart Negotiation Bot"
+                        >
+                          <Scale className="w-3 h-3 text-amber-400" />
+                          <span>🤝 Negotiate</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setPredictionCrop(prod.product_name)}
+                          className="py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 text-emerald-300 text-[11px] font-bold transition-all flex items-center justify-center gap-1"
+                          title="View 14-Day Price Forecast"
+                        >
+                          <Sparkles className="w-3 h-3 text-emerald-400" />
+                          <span>🔮 Forecast</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
@@ -1622,6 +1660,23 @@ export default function BulkBuyerDashboard({ currentUser, onLogout, onNavigate, 
         </div>
       )}
 
+      {/* Smart Negotiation Bot Modal */}
+      <SmartNegotiationModal
+        isOpen={showNegotiationModal}
+        onClose={() => setShowNegotiationModal(false)}
+        crop={negotiationProduct || products[0] || { product_name: 'Hybrid Tomato', price_per_kg: 28 }}
+        onDealFinalized={(deal) => {
+          showToastMsg(`✓ Negotiated Wholesale Agreement reached at ₹${deal.agreedPrice}/kg!`);
+          fetchProducts();
+        }}
+      />
+
+      {/* AI Crop Price Prediction Modal */}
+      <AICropPricePredictionModal
+        isOpen={Boolean(predictionCrop)}
+        onClose={() => setPredictionCrop(null)}
+        cropName={predictionCrop || 'Wheat'}
+      />
     </div>
   );
 }

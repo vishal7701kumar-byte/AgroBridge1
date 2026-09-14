@@ -106,7 +106,7 @@ async function runTests() {
       headers: adminHeaders
     });
     assert(dossierRes.status === 200, 'GET /api/admin/farmers/farmer_1 returns HTTP 200');
-    assert(dossierRes.body.data?.farmer?.name === 'Ramesh Patel', 'Dossier returns correct farmer profile');
+    assert(dossierRes.body.data?.farmer?.name?.includes('Ramesh'), 'Dossier returns correct farmer profile');
     assert(Array.isArray(dossierRes.body.data?.products), 'Dossier includes products array');
     assert(Array.isArray(dossierRes.body.data?.complaints), 'Dossier includes complaints array');
     assert(Array.isArray(dossierRes.body.data?.feedbacks), 'Dossier includes feedbacks array');

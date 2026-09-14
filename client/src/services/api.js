@@ -85,6 +85,38 @@ export const farmerAPI = {
   },
   markNotificationRead: async (id) => {
     return await api.put(`/notifications/${id}/read`);
+  },
+  getWasteAlerts: async () => {
+    return await api.get('/farmer/waste-alerts');
+  },
+  notifyBulkBuyersDiscount: async (payload) => {
+    return await api.post('/farmer/notify-bulk-buyers', payload);
+  },
+  // Farmer Financial Analytics & Expense Management
+  getFinancialSummary: async () => {
+    return await api.get('/farmer/financial-summary');
+  },
+  getMonthlyProfit: async (filter = '3-months') => {
+    return await api.get(`/farmer/monthly-profit?filter=${filter}`);
+  },
+  getProductProfit: async () => {
+    return await api.get('/farmer/product-profit');
+  },
+  getExpenses: async (params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return await api.get(`/farmer/expenses${q ? `?${q}` : ''}`);
+  },
+  addExpense: async (expenseData) => {
+    return await api.post('/farmer/expenses', expenseData);
+  },
+  updateExpense: async (id, expenseData) => {
+    return await api.put(`/farmer/expenses/${id}`, expenseData);
+  },
+  deleteExpense: async (id) => {
+    return await api.delete(`/farmer/expenses/${id}`);
+  },
+  downloadFinancialReport: async (month = 'September 2026') => {
+    return await api.get(`/farmer/report/csv?month=${encodeURIComponent(month)}`, { responseType: 'blob' });
   }
 };
 
@@ -146,6 +178,9 @@ export const consumerAPI = {
   },
   getMyComplaints: async () => {
     return await api.get('/complaints/my');
+  },
+  getDigitalReceipt: async (orderId) => {
+    return await api.get(`/receipt/${orderId}`);
   }
 };
 
@@ -274,6 +309,54 @@ export const adminAPI = {
   getAuditLogs: async (params = {}) => {
     const q = new URLSearchParams(params).toString();
     return await api.get(`/admin/audit-logs${q ? `?${q}` : ''}`);
+  },
+  // Admin Platform Revenue Analytics & Operating Costs
+  getRevenueSummary: async () => {
+    return await api.get('/admin/revenue-summary');
+  },
+  getRevenueTrend: async (filter = '3-months') => {
+    return await api.get(`/admin/revenue-trend?filter=${filter}`);
+  },
+  getRevenueByCategory: async () => {
+    return await api.get('/admin/revenue-by-category');
+  },
+  getRevenueByUserType: async () => {
+    return await api.get('/admin/revenue-by-user-type');
+  },
+  getTopFarmers: async () => {
+    return await api.get('/admin/top-farmers');
+  },
+  getTopProducts: async () => {
+    return await api.get('/admin/top-products');
+  },
+  getDeliveryFinancials: async () => {
+    return await api.get('/admin/delivery-financials');
+  },
+  getRefundAnalytics: async () => {
+    return await api.get('/admin/refund-analytics');
+  },
+  getExpenses: async (params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return await api.get(`/admin/expenses${q ? `?${q}` : ''}`);
+  },
+  addExpense: async (expenseData) => {
+    return await api.post('/admin/expenses', expenseData);
+  },
+  updateExpense: async (id, expenseData) => {
+    return await api.put(`/admin/expenses/${id}`, expenseData);
+  },
+  deleteExpense: async (id) => {
+    return await api.delete(`/admin/expenses/${id}`);
+  },
+  getTransactions: async (params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return await api.get(`/admin/revenue/transactions${q ? `?${q}` : ''}`);
+  },
+  getAIInsights: async () => {
+    return await api.get('/admin/ai-insights');
+  },
+  downloadRevenueReport: async (period = 'September 2026') => {
+    return await api.get(`/admin/report/csv?period=${encodeURIComponent(period)}`, { responseType: 'blob' });
   }
 };
 
@@ -289,6 +372,24 @@ export const aiAPI = {
   },
   getFutureInsights: async (commodity, period, role) => {
     return await api.post('/ai/future-insights', { commodity, period, role });
+  },
+  getPricePrediction: async (crop) => {
+    return await api.get(`/ai/price-prediction/${crop}`);
+  },
+  scanQuality: async (image, cropName) => {
+    return await api.post('/ai/quality-scan', { image, cropName });
+  },
+  evaluateNegotiation: async (dealData) => {
+    return await api.post('/ai/negotiate', dealData);
+  },
+  getCropCalendar: async () => {
+    return await api.get('/ai/crop-calendar');
+  },
+  chat: async (params, language = 'en') => {
+    if (typeof params === 'object' && params !== null) {
+      return await api.post('/ai/chat', params);
+    }
+    return await api.post('/ai/chat', { query: params, language });
   }
 };
 

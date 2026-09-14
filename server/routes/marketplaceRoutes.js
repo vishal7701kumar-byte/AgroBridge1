@@ -773,4 +773,10 @@ router.put('/admin/complaints/:id', protect, authorize('ADMIN'), (req, res) => {
   });
 });
 
+// SIH Feature 22: Cryptographic Tamper-Evident Digital Receipt (SHA-256)
+router.get('/receipt/:orderId', (req, res) => {
+  const receipt = dataService.generateDigitalReceipt(req.params.orderId);
+  res.json(receipt);
+});
+
 module.exports = router;

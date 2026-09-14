@@ -1,0 +1,32 @@
+# Node Dependencies
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# Production Build Artifacts
+client/dist/
+dist/
+build/
+
+# Environment Variables & Secrets
+.env
+.env.local
+.env.*.local
+*.env
+
+# Logs & System Cache
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.system_generated/
+
+# OS & Editor Files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Uploads directory contents (preserve directory via .gitkeep)
+server/uploads/*
+!server/uploads/.gitkeep

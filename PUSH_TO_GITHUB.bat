@@ -3,7 +3,7 @@ title Push AgroBridge to GitHub
 cd /d "C:\Users\VISHAL\.gemini\antigravity\scratch\agrobridge"
 
 echo =======================================================
-echo Pushing AgroBridge to https://github.com/vishalbist299-hub/AgroBridge1.git
+echo Pushing AgroBridge to https://github.com/vishal7701kumar-byte/AgroBridge1.git
 echo =======================================================
 echo.
 
@@ -13,7 +13,7 @@ if %errorlevel% equ 0 (
     echo.
     echo =======================================================
     echo SUCCESS! Project successfully pushed to GitHub!
-    echo Check: https://github.com/vishalbist299-hub/AgroBridge1
+    echo Check: https://github.com/vishal7701kumar-byte/AgroBridge1
     echo =======================================================
 ) else (
     echo.

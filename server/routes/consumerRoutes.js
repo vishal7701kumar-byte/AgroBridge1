@@ -2,6 +2,14 @@ const express = require('express');
 const router = express.Router();
 const { protect, authorize } = require('../middleware/authMiddleware');
 
+const smartOfferService = require('../services/smartOfferService');
+
+// Curated Consumer Smart Offers (Weather, Seasonal, Festival, AI Recommended)
+router.get('/smart-offers', (req, res) => {
+  const offers = smartOfferService.getConsumerSmartOffers();
+  res.json({ success: true, count: offers.length, offers, data: offers });
+});
+
 // All routes under /api/consumer/* require authentication and CONSUMER role
 router.use(protect);
 router.use(authorize('CONSUMER'));

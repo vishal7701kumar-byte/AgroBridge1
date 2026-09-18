@@ -42,6 +42,10 @@ app.get('/api/health', (req, res) => {
 
 const marketplaceRoutes = require('./routes/marketplaceRoutes');
 const aiRoutes = require('./routes/aiRoutes');
+const whatsappRoutes = require('./routes/whatsappRoutes');
+const ivrRoutes = require('./routes/ivrRoutes');
+const mandiRoutes = require('./routes/mandiRoutes');
+const marketPriceRoutes = require('./routes/marketPriceRoutes');
 
 // Mount Routes
 app.use('/api/auth', authRoutes);
@@ -52,6 +56,10 @@ app.use('/api/driver', driverRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api', marketplaceRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/whatsapp', whatsappRoutes);
+app.use('/api/ivr', ivrRoutes);
+app.use('/api/mandi', mandiRoutes);
+app.use('/api/market-prices', marketPriceRoutes);
 
 const path = require('path');
 const fs = require('fs');

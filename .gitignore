@@ -30,3 +30,16 @@ Thumbs.db
 # Uploads directory contents (preserve directory via .gitkeep)
 server/uploads/*
 !server/uploads/.gitkeep
+
+# Python Cache & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+venv/
+.venv/
+env/
+
+# Scratch & temporary development scripts
+scratch/
+

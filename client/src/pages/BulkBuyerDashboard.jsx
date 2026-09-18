@@ -5,7 +5,7 @@ import {
   Truck, MapPin, AlertCircle, ArrowRight, ChevronRight, Scale, Award,
   Info, Calendar, DollarSign, Package, Eye
 } from 'lucide-react';
-import { bulkBuyerAPI, consumerAPI } from '../services/api';
+import { bulkBuyerAPI, consumerAPI, smartOffersAPI } from '../services/api';
 import AgroProductImage from '../components/AgroProductImage';
 import SmartNegotiationModal from '../components/SmartNegotiationModal';
 import AICropPricePredictionModal from '../components/AICropPricePredictionModal';
@@ -22,6 +22,7 @@ export default function BulkBuyerDashboard({ currentUser, onLogout, onNavigate, 
   const [rfqs, setRfqs] = useState([]);
   const [products, setProducts] = useState([]);
   const [bulkOrders, setBulkOrders] = useState([]);
+  const [buyerOffers, setBuyerOffers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
 
@@ -87,10 +88,11 @@ export default function BulkBuyerDashboard({ currentUser, onLogout, onNavigate, 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [dashRes, rfqRes, ordRes] = await Promise.allSettled([
+      const [dashRes, rfqRes, ordRes, offersRes] = await Promise.allSettled([
         bulkBuyerAPI.getDashboard(),
         bulkBuyerAPI.getRFQs(),
-        bulkBuyerAPI.getMyBulkOrders()
+        bulkBuyerAPI.getMyBulkOrders(),
+        smartOffersAPI.getBuyerOffers()
       ]);
 
       if (dashRes.status === 'fulfilled' && dashRes.value.data?.success) {
@@ -101,6 +103,9 @@ export default function BulkBuyerDashboard({ currentUser, onLogout, onNavigate, 
       }
       if (ordRes.status === 'fulfilled' && ordRes.value.data?.success) {
         setBulkOrders(ordRes.value.data.data);
+      }
+      if (offersRes.status === 'fulfilled' && offersRes.value.data?.data) {
+        setBuyerOffers(offersRes.value.data.data);
       }
     } catch (err) {
       console.error('Failed to fetch bulk buyer data:', err);
@@ -492,6 +497,115 @@ export default function BulkBuyerDashboard({ currentUser, onLogout, onNavigate, 
               )}
             </div>
           </div>
+
+          {/* SECTION: 🌾 BULK BUYER SMART OFFERS & AI DEMAND ALERTS */}
+          {buyerOffers.length > 0 && (
+            <div className="rounded-3xl bg-slate-900/90 border border-indigo-500/30 p-6 space-y-5 shadow-xl">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-2xl">🌾</span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-lg font-bold text-white">Wholesale Smart Offers & Volume Tier Pricing</h2>
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 uppercase">
+                        AI B2B Demand Engine
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-400">
+                      Tiered wholesale discounts & seasonal pre-order contracts with guaranteed farmer fulfillment
+                    </p>
+                  </div>
+                </div>
+                <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-950 border border-slate-800 text-slate-400">
+                  Prototype Simulation
+                </span>
+              </div>
+
+              {/* AI Surge Banner if applicable */}
+              {buyerOffers[0]?.aiDemandSurgeAlert && (
+                <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-3 text-xs text-amber-200">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">🚨</span>
+                    <span className="font-semibold">{buyerOffers[0].aiDemandSurgeAlert}</span>
+                  </div>
+                  <span className="text-[11px] font-mono text-amber-300 shrink-0">Hedge Spike Risk</span>
+                </div>
+              )}
+
+              {/* Buyer Offer Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                {buyerOffers.map((offer) => (
+                  <div 
+                    key={offer.id}
+                    className="rounded-2xl bg-slate-950/80 border border-slate-800 hover:border-indigo-500/40 p-5 flex flex-col justify-between space-y-4 shadow-lg group transition-all"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">
+                            {offer.category}
+                          </span>
+                          <h3 className="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors">
+                            {offer.commodity}
+                          </h3>
+                        </div>
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                          MOQ: {offer.moqKg} kg
+                        </span>
+                      </div>
+
+                      <div className="text-xs text-slate-400 flex items-center gap-1.5">
+                        <span>Base Rate:</span>
+                        <strong className="text-white font-bold">₹{offer.basePrice}/kg</strong>
+                      </div>
+
+                      {/* Tier Pricing Table */}
+                      <div className="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800/80 space-y-1.5 text-[11px]">
+                        <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                          Volume Discount Tiers:
+                        </div>
+                        {(offer.tiers || []).map((tier, idx) => (
+                          <div key={idx} className="flex items-center justify-between text-slate-300">
+                            <span>{tier.tier}</span>
+                            <span className="font-mono text-emerald-400 font-bold">
+                              ₹{tier.pricePerKg}/kg (-{tier.discountPercent}%)
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="p-2 rounded-xl bg-slate-900/60 border border-slate-800 text-[10px] text-slate-400 flex items-start gap-1.5">
+                        <Info className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />
+                        <span className="italic leading-snug">{offer.reason || 'AI-assisted forecast based on available regional data'}</span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-800 flex items-center justify-between">
+                      <span className="text-[11px] font-mono text-emerald-400 font-bold">
+                        {offer.confidence || 95}% Confidence
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRfqCommodity(offer.commodity);
+                          setRfqVolumeTons(((offer.moqKg || 500) / 1000).toString());
+                          setRfqModal(true);
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md transition-all active:scale-95"
+                      >
+                        Procure at Tier
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-2 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-800/60">
+                <span>💡 AI-assisted forecast • Suggested wholesale contract rate based on festive surge & harvest supply velocity.</span>
+                <span className="font-mono text-indigo-400 font-bold">Safe Mandi Disintermediation</span>
+              </div>
+            </div>
+          )}
 
           {/* Active Filter Description Banner */}
           <div className="flex items-center justify-between px-2 text-xs text-slate-400">

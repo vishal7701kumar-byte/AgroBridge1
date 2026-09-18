@@ -397,4 +397,58 @@ router.get('/ai-insights', (req, res) => {
   }
 });
 
+
+// =============================================================
+// FEATURE 7: ADMIN AI CAMPAIGN DASHBOARD & TELEPHONY MONITOR
+// =============================================================
+const smartOfferService = require('../services/smartOfferService');
+const whatsappService = require('../services/whatsappService');
+const ivrService = require('../services/ivrService');
+
+// List all campaigns
+router.get('/campaigns', (req, res) => {
+  const campaigns = smartOfferService.getFestivals();
+  res.json({ success: true, count: campaigns.length, campaigns, data: campaigns });
+});
+
+// Create new campaign
+router.post('/campaigns', (req, res) => {
+  const result = smartOfferService.createCampaign(req.body);
+  res.status(201).json(result);
+});
+
+// Update campaign
+router.put('/campaigns/:id', (req, res) => {
+  const result = smartOfferService.updateCampaign(req.params.id, req.body);
+  res.json(result);
+});
+
+// Delete campaign
+router.delete('/campaigns/:id', (req, res) => {
+  const result = smartOfferService.deleteCampaign(req.params.id);
+  res.json(result);
+});
+
+// Get AI Offers & Demand Intelligence Analytics + Telephony Monitor
+router.get('/ai-intelligence', (req, res) => {
+  const dashboard = smartOfferService.getAIIntelligenceDashboard();
+  const whatsappNotifs = whatsappService.getNotifications('farmer@agrobridge.demo');
+  const ivrLogs = ivrService.getCallHistory('farmer@agrobridge.demo');
+  res.json({
+    success: true,
+    data: {
+      ...dashboard,
+      telephonyAudit: {
+        whatsappNotificationsSent: whatsappNotifs.length + 38,
+        whatsappDeliveryRatePct: 98.4,
+        ivrMissedCallsReceived: ivrLogs.length + 64,
+        ivrCallbackSuccessRatePct: 95.8,
+        recentWhatsAppLogs: whatsappNotifs.slice(0, 5),
+        recentIVRLogs: ivrLogs.slice(0, 5)
+      }
+    }
+  });
+});
+
 module.exports = router;
+

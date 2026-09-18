@@ -779,4 +779,72 @@ router.get('/receipt/:orderId', (req, res) => {
   res.json(receipt);
 });
 
+
+// =============================================================
+// FEATURE 6: AI SMART OFFERS, WEATHER & FESTIVAL DEMAND
+// =============================================================
+const smartOfferService = require('../services/smartOfferService');
+
+// Current regional weather and 7-day forecast
+router.get('/weather', (req, res) => {
+  const data = smartOfferService.getWeather();
+  res.json({ success: true, data, isDemoData: true });
+});
+
+// Configurable festival calendar
+router.get('/festivals', (req, res) => {
+  const data = smartOfferService.getFestivals();
+  res.json({ success: true, count: data.length, data });
+});
+
+// Curated Consumer Smart Offers (Weather, Seasonal, Festival, AI Recommended)
+router.get('/consumer/smart-offers', (req, res) => {
+  const offers = smartOfferService.getConsumerSmartOffers();
+  res.json({ success: true, count: offers.length, offers, data: offers });
+});
+
+// Curated Bulk Buyer Smart Offers & Demand Alerts
+router.get('/buyer/smart-offers', (req, res) => {
+  const offers = smartOfferService.getBulkBuyerSmartOffers();
+  res.json({ success: true, count: offers.length, offers, data: offers });
+});
+
+// Unified smart offers endpoint
+router.get('/ai/smart-offers', (req, res) => {
+  const audience = req.query.audience || 'ALL';
+  const consumer = smartOfferService.getConsumerSmartOffers();
+  const buyer = smartOfferService.getBulkBuyerSmartOffers();
+  res.json({
+    success: true,
+    consumerOffers: consumer,
+    bulkBuyerOffers: buyer,
+    total: consumer.length + buyer.length
+  });
+});
+
+// Modular AI Demand Forecast Engine
+router.get('/ai/forecast', (req, res) => {
+  const { crop, season, region } = req.query;
+  const forecast = smartOfferService.getAIForecast({ crop, season, region });
+  res.json({ success: true, forecast, data: forecast });
+});
+
+// Dynamic AI Offer Generator
+router.post('/ai/generate-offer', (req, res) => {
+  const { crop, discountPct, audience } = req.body;
+  const forecast = smartOfferService.getAIForecast({ crop: crop || 'Tomato' });
+  res.json({
+    success: true,
+    generatedOffer: {
+      crop: crop || 'Tomato',
+      suggestedDiscount: discountPct || 10,
+      audience: audience || 'CONSUMER',
+      reason: forecast.reason,
+      confidence: forecast.confidence,
+      disclaimer: 'AI-assisted suggested offer based on available market conditions.'
+    }
+  });
+});
+
 module.exports = router;
+

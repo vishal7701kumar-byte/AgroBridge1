@@ -1,48 +1,128 @@
 const express = require('express');
 const router = express.Router();
 const dataService = require('../services/dataService');
+const aiForecastBridge = require('../services/aiForecastBridgeService');
+const govMandiService = require('../services/govMandiService');
 
-// Dynamic AI Price Recommendation
-router.post('/price-recommendation', (req, res) => {
-  const { commodity, grade, quantityKg } = req.body;
-  const result = dataService.calculatePriceRecommendation(
-    commodity || 'Tomato',
-    grade || 'Grade A',
-    parseFloat(quantityKg) || 100
-  );
-  res.json({ success: true, data: result });
+// Dynamic AI Price Recommendation (Strict 3-Way Separation & Transparent Realization)
+router.post('/price-recommendation', async (req, res) => {
+  try {
+    const { commodity, grade, quantityKg, farmerPrice, farmerListingPrice, market, region } = req.body;
+    const crop = commodity || 'Tomato';
+    const mkt = market || region || 'Bhopal';
+    const qty = parseFloat(quantityKg) || 500;
+    const userPrice = (farmerListingPrice || farmerPrice) ? parseFloat(farmerListingPrice || farmerPrice) : null;
+
+    const advisory = await aiForecastBridge.getPriceForecast({
+      commodity: crop,
+      market: mkt,
+      forecastDays: 7,
+      farmerListingPrice: userPrice
+    });
+
+    const mandiRate = advisory.mandiBenchmarkRate || advisory.currentMarketReference?.pricePerKg || 22;
+    const farmerRate = userPrice || advisory.recommendedDirectRate || Math.round(mandiRate * 1.18 * 10) / 10;
+    const grossMandi = Math.round(mandiRate * qty);
+    const grossFarmer = Math.round(farmerRate * qty);
+    const grossDiff = grossFarmer - grossMandi;
+    const commSavings = Math.round(grossMandi * 0.07);
+    const totalRealization = grossDiff + commSavings;
+    const extraPerKg = Math.round((farmerRate - mandiRate) * 10) / 10;
+    const bonusPct = `${farmerRate >= mandiRate ? '+' : ''}${Math.round(((farmerRate - mandiRate) / mandiRate) * 100)}%`;
+
+    const result = {
+      ...advisory,
+      commodity: crop,
+      grade: grade || 'Grade A',
+      quantityKg: qty,
+      mandiBenchmarkRate: mandiRate,
+      recommendedDirectRate: farmerRate,
+      farmerListingPrice: farmerRate,
+      extraEarningsPerKg: extraPerKg,
+      percentageBonus: bonusPct,
+      totalExtraEarnings: totalRealization,
+      estimatedAdditionalRealization: totalRealization,
+      realizationBreakdown: {
+        quantityKg: qty,
+        mandiGross: grossMandi,
+        farmerGross: grossFarmer,
+        grossDirectDifference: grossDiff,
+        middlemanCommissionSaved: commSavings,
+        commissionRatePct: 7,
+        totalEstimatedAdditionalRealization: totalRealization,
+        formulaExplanation: `(Farmer Listing Price [₹${farmerRate}] - Mandi Benchmark [₹${mandiRate}]) × ${qty} kg + 7% APMC Middleman Brokerage Saved`,
+        disclaimer: 'Estimated Additional Realization represents the gross financial difference compared to the local APMC benchmark rate, plus middleman commission savings. It does not account for farm-level production or harvest costs.'
+      },
+      aiAdvisory: advisory.aiAdvisory || `Direct listing on AgroBridge bypasses middleman auctions, securing an estimated additional realization of ₹${extraPerKg}/kg vs local APMC benchmarks.`
+    };
+
+    res.json({ success: true, data: result });
+  } catch (err) {
+    console.error('Error in /api/ai/price-recommendation:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
-// AI 7-Day Regional Demand Forecast
-router.post('/demand-forecast', (req, res) => {
-  const { commodity, region } = req.body;
-  const crop = commodity || 'Tomato';
-  const reg = region || 'Bhopal';
+// AI 7-Day Regional Demand Forecast (Real AGMARKNET Arrival Volume + Order Momentum)
+router.post('/demand-forecast', async (req, res) => {
+  try {
+    const { commodity, region, market } = req.body;
+    const crop = commodity || 'Tomato';
+    const reg = region || market || 'Bhopal';
 
-  const raw = dataService.predictDemand(crop, reg);
-
-  const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const forecastDays = (raw.daily_forecast || []).map((d, i) => ({
-    day: d.day || daysOfWeek[i % 7],
-    projectedDemandQuintals: Math.round((d.projected_demand_kg || 1500) / 100),
-    demandLevel: (d.projected_demand_kg > 3000) ? 'SURGING' : (d.projected_demand_kg > 1800) ? 'HIGH' : 'MODERATE'
-  }));
-
-  const totalQuintals = forecastDays.reduce((acc, f) => acc + f.projectedDemandQuintals, 0);
-
-  res.json({
-    success: true,
-    data: {
+    const forecast = await aiForecastBridge.getDemandForecast({
       commodity: crop,
-      region: reg,
-      totalWeeklyProjectedDemandQuintals: totalQuintals,
-      expectedPriceTrend: '+18% to +24%',
-      confidenceScore: 94.6,
-      forecastDays: forecastDays,
-      aiAdvisory: raw.english_advisory || `High demand projected for ${crop} in ${reg} belt. Commercial buyers expected to absorb output directly.`,
-      hindiAdvisory: raw.hindi_advisory || `अगले 7 दिनों में ${crop} की मांग ${reg} क्षेत्र में अत्यधिक रहने का अनुमान है। सीधे एग्रोब्रिज पर लिस्ट करें।`
+      market: reg,
+      forecastDays: 7
+    });
+
+    res.json({
+      success: true,
+      data: {
+        ...forecast,
+        commodity: crop,
+        region: reg,
+        market: reg,
+        totalWeeklyProjectedDemandQuintals: forecast.totalWeeklyProjectedDemandQuintals,
+        expectedPriceTrend: forecast.expectedPriceTrend,
+        priceMomentumPct: forecast.priceMomentumPct,
+        confidenceScore: forecast.confidenceScore,
+        forecastReliability: forecast.forecastReliability || 'High',
+        forecastReliabilityDetail: forecast.forecastReliabilityDetail,
+        forecastDays: forecast.forecastDays,
+        aiAdvisory: forecast.aiAdvisory,
+        hindiAdvisory: forecast.hindiAdvisory,
+        coldStart: forecast.coldStart,
+        coldStartNote: forecast.coldStartNote,
+        whyFactors: forecast.reasons || forecast.whyFactors,
+        factorsConsidered: forecast.factorsConsidered
+      }
+    });
+  } catch (err) {
+    console.error('Error in /api/ai/demand-forecast:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// AI Dynamic Forecast Generator
+router.post('/generate-forecast', async (req, res) => {
+  try {
+    const { type, commodity, market, region, forecastDays, farmerListingPrice, farmerPrice } = req.body;
+    const crop = commodity || 'Tomato';
+    const mkt = market || region || 'Bhopal';
+    const days = parseInt(forecastDays, 10) || 7;
+    const price = (farmerListingPrice || farmerPrice) ? parseFloat(farmerListingPrice || farmerPrice) : null;
+
+    if (type === 'price') {
+      const data = await aiForecastBridge.getPriceForecast({ commodity: crop, market: mkt, forecastDays: days, farmerListingPrice: price });
+      return res.json({ success: true, data });
+    } else {
+      const data = await aiForecastBridge.getDemandForecast({ commodity: crop, market: mkt, forecastDays: days });
+      return res.json({ success: true, data });
     }
-  });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 // AI Route Optimization (TSP Multi-Stop Solver)
@@ -177,5 +257,112 @@ router.post('/chat', (req, res) => {
   });
 });
 
+// ==========================================================
+// FARMER AI DECISION SUPPORT SYSTEM ENDPOINTS (Requirement 19)
+// ==========================================================
+
+/**
+ * GET /api/ai/demand-forecast
+ * Parameters: commodity, market, forecastDays
+ */
+router.get('/demand-forecast', async (req, res) => {
+  try {
+    const commodity = req.query.commodity || 'Tomato';
+    const market = req.query.market || 'Bhopal';
+    const forecastDays = parseInt(req.query.forecastDays, 10) || 7;
+
+    const forecast = await aiForecastBridge.getDemandForecast({ commodity, market, forecastDays });
+    res.json({ success: true, data: forecast });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * GET /api/ai/price-forecast
+ * Parameters: commodity, market, forecastDays, farmerPrice
+ */
+router.get('/price-forecast', async (req, res) => {
+  try {
+    const commodity = req.query.commodity || 'Tomato';
+    const market = req.query.market || '';
+    const forecastDays = parseInt(req.query.forecastDays, 10) || 7;
+    const farmerPrice = (req.query.farmerPrice || req.query.farmerListingPrice) ? parseFloat(req.query.farmerPrice || req.query.farmerListingPrice) : null;
+
+    const advisory = await aiForecastBridge.getPriceForecast({
+      commodity,
+      market,
+      forecastDays,
+      farmerListingPrice: farmerPrice
+    });
+    res.json({ success: true, data: advisory });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * GET /api/ai/market-insight
+ * Parameters: commodity, market, farmerPrice
+ */
+router.get('/market-insight', async (req, res) => {
+  try {
+    const commodity = req.query.commodity || 'Tomato';
+    const market = req.query.market || '';
+    const farmerPrice = (req.query.farmerPrice || req.query.farmerListingPrice) ? parseFloat(req.query.farmerPrice || req.query.farmerListingPrice) : null;
+
+    const insight = await aiForecastBridge.getMarketInsight({
+      commodity,
+      market,
+      farmerListingPrice: farmerPrice
+    });
+    res.json({ success: true, data: insight });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * GET /api/ai/model-status
+ */
+router.get('/model-status', async (req, res) => {
+  try {
+    const status = await aiForecastBridge.getModelStatus();
+    res.json(status);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * GET /api/ai/data-sources
+ */
+router.get('/data-sources', (req, res) => {
+  try {
+    const sources = aiForecastBridge.getDataSources();
+    res.json(sources);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+/**
+ * POST /api/ai/refresh-market-data
+ */
+router.post('/refresh-market-data', async (req, res) => {
+  try {
+    const { commodity, state, district, market } = req.body || {};
+    const fetchRes = await govMandiService.fetchFromGovAPI({ commodity, state, district, market });
+    res.json({
+      success: true,
+      message: 'Government market data refresh dispatched',
+      result: fetchRes
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 module.exports = router;
+
 

@@ -361,8 +361,15 @@ export const adminAPI = {
 };
 
 export const aiAPI = {
-  getPriceRecommendation: async (commodity, grade, quantityKg) => {
-    return await api.post('/ai/price-recommendation', { commodity, grade, quantityKg });
+  getPriceRecommendation: async (commodity, grade, quantityKg, farmerPrice = null, market = 'Bhopal') => {
+    return await api.post('/ai/price-recommendation', { 
+      commodity, 
+      grade, 
+      quantityKg, 
+      farmerPrice, 
+      farmerListingPrice: farmerPrice,
+      market 
+    });
   },
   getDemandForecast: async (commodity, region) => {
     return await api.post('/ai/demand-forecast', { commodity, region });
@@ -390,6 +397,32 @@ export const aiAPI = {
       return await api.post('/ai/chat', params);
     }
     return await api.post('/ai/chat', { query: params, language });
+  },
+  // Farmer AI Decision Support System Methods
+  getFarmerDemandForecast: async (params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return await api.get(`/ai/demand-forecast${q ? `?${q}` : ''}`);
+  },
+  getFarmerPriceForecast: async (params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return await api.get(`/ai/price-forecast${q ? `?${q}` : ''}`);
+  },
+  getMarketInsight: async (params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return await api.get(`/ai/market-insight${q ? `?${q}` : ''}`);
+  },
+  getPriceHistory: async (params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return await api.get(`/market-prices/history${q ? `?${q}` : ''}`);
+  },
+  getModelStatus: async () => {
+    return await api.get('/ai/model-status');
+  },
+  getDataSources: async () => {
+    return await api.get('/ai/data-sources');
+  },
+  refreshMarketData: async (data = {}) => {
+    return await api.post('/ai/refresh-market-data', data);
   }
 };
 
@@ -402,4 +435,116 @@ export const notificationAPI = {
   }
 };
 
+export const whatsappAPI = {
+  connect: async (data) => {
+    return await api.post('/whatsapp/connect', data);
+  },
+  getStatus: async (farmerId) => {
+    return await api.get(`/whatsapp/status${farmerId ? `?farmerId=${encodeURIComponent(farmerId)}` : ''}`);
+  },
+  getNotifications: async (farmerId) => {
+    return await api.get(`/whatsapp/notifications${farmerId ? `?farmerId=${encodeURIComponent(farmerId)}` : ''}`);
+  },
+  sendTest: async (farmerId) => {
+    return await api.post('/whatsapp/test', { farmerId });
+  },
+  sendCommand: async (command, farmerId) => {
+    return await api.post('/whatsapp/command', { command, farmerId });
+  }
+};
+
+export const ivrAPI = {
+  getStatus: async () => {
+    return await api.get('/ivr/status');
+  },
+  sendMissedCall: async (data = {}) => {
+    return await api.post('/ivr/missed-call', data);
+  },
+  initiateCallback: async (sessionId) => {
+    return await api.post('/ivr/callback', { sessionId });
+  },
+  selectOption: async (sessionId, option, language = 'hi') => {
+    return await api.post('/ivr/select-option', { sessionId, option, language });
+  },
+  getHistory: async (farmerId) => {
+    return await api.get(`/ivr/history${farmerId ? `?farmerId=${encodeURIComponent(farmerId)}` : ''}`);
+  }
+};
+
+export const smartOffersAPI = {
+  getWeather: async () => {
+    return await api.get('/weather');
+  },
+  getFestivals: async () => {
+    return await api.get('/festivals');
+  },
+  getConsumerOffers: async () => {
+    return await api.get('/consumer/smart-offers');
+  },
+  getBuyerOffers: async () => {
+    return await api.get('/buyer/smart-offers');
+  },
+  getForecast: async (params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return await api.get(`/ai/forecast${q ? `?${q}` : ''}`);
+  },
+  generateOffer: async (data) => {
+    return await api.post('/ai/generate-offer', data);
+  }
+};
+
+export const campaignAPI = {
+  getCampaigns: async () => {
+    return await api.get('/admin/campaigns');
+  },
+  createCampaign: async (campaignData) => {
+    return await api.post('/admin/campaigns', campaignData);
+  },
+  updateCampaign: async (id, campaignData) => {
+    return await api.put(`/admin/campaigns/${id}`, campaignData);
+  },
+  deleteCampaign: async (id) => {
+    return await api.delete(`/admin/campaigns/${id}`);
+  },
+  getAIIntelligence: async () => {
+    return await api.get('/admin/ai-intelligence');
+  }
+};
+
+export const mandiAPI = {
+  getPrices: async (params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return await api.get(`/mandi/prices${q ? `?${q}` : ''}`);
+  },
+  getCommodityPrices: async (commodity, params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return await api.get(`/mandi/commodity/${encodeURIComponent(commodity)}${q ? `?${q}` : ''}`);
+  },
+  refreshPrices: async () => {
+    return await api.post('/mandi/refresh');
+  },
+  getStatus: async () => {
+    return await api.get('/mandi/status');
+  }
+};
+
+export const marketPriceAPI = {
+  getMarketPrices: async (params = {}) => {
+    const q = new URLSearchParams(params).toString();
+    return await api.get(`/market-prices${q ? `?${q}` : ''}`);
+  },
+  getFilterOptions: async () => {
+    return await api.get('/market-prices/filters');
+  },
+  getStatus: async () => {
+    return await api.get('/market-prices/status');
+  },
+  refresh: async (payload = {}) => {
+    return await api.post('/market-prices/refresh', payload);
+  }
+};
+
 export default api;
+
+
+

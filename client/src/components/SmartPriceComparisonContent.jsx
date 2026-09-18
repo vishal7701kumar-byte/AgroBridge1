@@ -17,7 +17,7 @@ import {
   Legend,
   Cell
 } from 'recharts';
-import { consumerAPI } from '../services/api';
+import { consumerAPI, marketPriceAPI } from '../services/api';
 import AgroProductImage, { getProductImage } from './AgroProductImage';
 
 export default function SmartPriceComparisonContent({ 
@@ -33,6 +33,58 @@ export default function SmartPriceComparisonContent({
   const [alertSuccess, setAlertSuccess] = useState(null);
   const [alertLoading, setAlertLoading] = useState(false);
 
+  // Government OGD Mandi Price Explorer State
+  const [explorerFilters, setExplorerFilters] = useState({
+    commodity: '',
+    state: '',
+    district: '',
+    market: ''
+  });
+  const [filterOptions, setFilterOptions] = useState({
+    commodities: [],
+    states: [],
+    districts: [],
+    markets: []
+  });
+  const [explorerResult, setExplorerResult] = useState(null);
+  const [explorerLoading, setExplorerLoading] = useState(false);
+  const [explorerError, setExplorerError] = useState(null);
+  const [selectedMandiRecord, setSelectedMandiRecord] = useState(null);
+
+  const fetchFilterOptions = async () => {
+    try {
+      const res = await marketPriceAPI.getFilterOptions();
+      if (res.data && res.data.success) {
+        setFilterOptions(res.data.data);
+      }
+    } catch (e) {
+      console.error('Failed to load filter options:', e);
+    }
+  };
+
+  const fetchMandiExplorer = async (filtersToUse = explorerFilters) => {
+    setExplorerLoading(true);
+    setExplorerError(null);
+    try {
+      const cleanParams = {};
+      if (filtersToUse.commodity) cleanParams.commodity = filtersToUse.commodity;
+      if (filtersToUse.state) cleanParams.state = filtersToUse.state;
+      if (filtersToUse.district) cleanParams.district = filtersToUse.district;
+      if (filtersToUse.market) cleanParams.market = filtersToUse.market;
+
+      const res = await marketPriceAPI.getMarketPrices(cleanParams);
+      if (res.data && res.data.success) {
+        setExplorerResult(res.data);
+      } else {
+        setExplorerError(res.data?.error || 'Government mandi price data is currently unavailable.');
+      }
+    } catch (e) {
+      setExplorerError('Government mandi price data is currently unavailable.');
+    } finally {
+      setExplorerLoading(false);
+    }
+  };
+
   const fetchComparison = async () => {
     if (!productId && !initialProduct?.id) return;
     const pId = productId || initialProduct.id;
@@ -44,8 +96,15 @@ export default function SmartPriceComparisonContent({
       ]);
 
       if (compRes.data && compRes.data.success) {
-        setData(compRes.data.data);
-        setTargetPrice(Math.max(5, (compRes.data.data.agroBridgePrice - 3)).toString());
+        const prodData = compRes.data.data;
+        setData(prodData);
+        setTargetPrice(Math.max(5, (prodData.agroBridgePrice - 3)).toString());
+
+        // Initialize explorer filters with product's commodity
+        const firstWord = prodData.productName ? prodData.productName.split(' ')[0] : '';
+        const initialFilters = { commodity: firstWord, state: '', district: '', market: '' };
+        setExplorerFilters(initialFilters);
+        fetchMandiExplorer(initialFilters);
       }
       if (histRes.data && histRes.data.success) {
         setHistory(histRes.data.data);
@@ -58,6 +117,7 @@ export default function SmartPriceComparisonContent({
   };
 
   useEffect(() => {
+    fetchFilterOptions();
     fetchComparison();
   }, [productId, initialProduct?.id]);
 
@@ -101,23 +161,23 @@ export default function SmartPriceComparisonContent({
   // Data for Recharts Bar Chart
   const chartBarData = [
     {
-      source: 'AgroBridge',
+      source: 'Farmer Direct (DB)',
       price: data.agroBridgePrice,
       fill: '#14b8a6', // Teal
       label: `₹${data.agroBridgePrice}`
     },
-    {
-      source: 'Local Market',
+    ...(data.mandiAvailable && data.marketPrice ? [{
+      source: 'APMC Mandi (Govt)',
       price: data.marketPrice,
       fill: '#f43f5e', // Rose
       label: `₹${data.marketPrice}`
-    },
-    {
-      source: 'Market Avg',
+    }] : []),
+    ...(data.mandiAvailable && data.regionalAveragePrice ? [{
+      source: 'Regional Mandi Avg',
       price: data.regionalAveragePrice,
       fill: '#f59e0b', // Amber
       label: `₹${data.regionalAveragePrice}`
-    },
+    }] : []),
     {
       source: 'AI Fair (Avg)',
       price: Math.round(((data.aiFairMin + data.aiFairMax) / 2) * 10) / 10,
@@ -173,42 +233,77 @@ export default function SmartPriceComparisonContent({
         )}
       </div>
 
-      {/* Dynamic Savings Highlight Banner */}
-      <div className="p-5 rounded-3xl bg-gradient-to-r from-emerald-950/80 via-teal-950/70 to-slate-900 border border-emerald-500/40 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-black text-xl shadow-inner">
-            💰
+      {/* Price Difference & Comparison Banner */}
+      {data.mandiAvailable && data.marketPrice ? (
+        <div className="p-5 rounded-3xl bg-gradient-to-r from-emerald-950/80 via-teal-950/70 to-slate-900 border border-emerald-500/40 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 flex items-center justify-center font-black text-xl shadow-inner">
+              💰
+            </div>
+            <div>
+              <div className="text-[11px] uppercase tracking-wider font-bold text-emerald-300">Market Price Information & Difference</div>
+              <div className="text-2xl sm:text-3xl font-black text-white flex items-baseline gap-2">
+                <span>Price Difference: ₹{Math.abs(Math.round((data.marketPrice - data.agroBridgePrice) * 10) / 10)} / kg</span>
+                <span className="text-sm font-bold text-emerald-400">
+                  {data.agroBridgePrice <= data.marketPrice
+                    ? `(Farmer is ₹${Math.round((data.marketPrice - data.agroBridgePrice) * 10) / 10}/kg lower than Mandi)`
+                    : `(Farmer is ₹${Math.round((data.agroBridgePrice - data.marketPrice) * 10) / 10}/kg premium)`}
+                </span>
+              </div>
+            </div>
           </div>
-          <div>
-            <div className="text-[11px] uppercase tracking-wider font-bold text-emerald-300">Direct Farm Gate Savings</div>
-            <div className="text-2xl sm:text-3xl font-black text-white flex items-baseline gap-2">
-              <span>You Save ₹{data.savings} / kg</span>
-              <span className="text-sm font-bold text-emerald-400">({data.cheaperText})</span>
+
+          <div className="text-xs text-slate-300 bg-slate-950/60 p-3 rounded-2xl border border-emerald-500/20 max-w-sm space-y-1">
+            <div className="font-mono text-[11px] text-slate-300">
+              Government Mandi Reference: <strong>₹{data.marketPrice}/kg equivalent</strong>
+            </div>
+            <div className="font-mono text-[11px] text-slate-400">
+              Original: ₹{data.mandiDetails?.modalPriceQuintal || data.marketPrice * 100}/quintal
+            </div>
+            <div className="font-mono text-[11px] text-teal-300">
+              Farmer’s Listed Price: <strong>₹{data.agroBridgePrice}/kg</strong>
+            </div>
+            <div className="text-[10px] text-slate-400 border-t border-slate-800 pt-1">
+              Conversion logic: <code className="text-teal-400">₹/kg = ₹/quintal ÷ 100</code>
             </div>
           </div>
         </div>
-
-        <div className="text-xs text-slate-300 bg-slate-950/60 p-3 rounded-2xl border border-emerald-500/20 max-w-sm">
-          <span className="font-semibold text-emerald-300">Dynamic Calculation:</span>
-          <div className="font-mono text-[11px] text-slate-400 mt-0.5">
-            Market (₹{data.marketPrice}) - AgroBridge (₹{data.agroBridgePrice}) = ₹{data.savings}/kg saved
+      ) : (
+        <div className="p-5 rounded-3xl bg-slate-900/90 border border-teal-500/30 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-teal-500/20 border border-teal-500/40 text-teal-300 flex items-center justify-center font-black text-xl shadow-inner">
+              🌾
+            </div>
+            <div>
+              <div className="text-[11px] uppercase tracking-wider font-bold text-teal-400">Farmer’s Listed Price</div>
+              <div className="text-2xl sm:text-3xl font-black text-white flex items-baseline gap-2">
+                <span>₹{data.agroBridgePrice} / kg</span>
+                <span className="text-xs font-normal text-teal-300 bg-teal-950 px-2 py-0.5 rounded border border-teal-500/30">AgroBridge DB Verified</span>
+              </div>
+            </div>
+          </div>
+          <div className="text-xs text-slate-400 bg-slate-950/60 p-3 rounded-2xl border border-slate-800 max-w-md">
+            <span className="text-amber-400/90 flex items-center gap-1.5">
+              <AlertCircle className="w-4 h-4 shrink-0 text-amber-400" />
+              <span>Government mandi price data is currently unavailable for this crop. AgroBridge strictly avoids displaying unverified or fake prices.</span>
+            </span>
           </div>
         </div>
-      </div>
+      )}
 
       {/* 4 PRICE SOURCES CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         
-        {/* 1. AGROBRIDGE DIRECT */}
+        {/* 1. FARMER'S LISTED PRICE */}
         <div className="p-5 rounded-3xl bg-slate-900 border-2 border-teal-500/60 space-y-3 relative overflow-hidden shadow-xl shadow-teal-500/10">
           <div className="absolute -top-3 -right-3 w-16 h-16 bg-teal-500/10 rounded-full blur-xl pointer-events-none" />
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-teal-400 flex items-center gap-1.5">
               <span>🌾</span>
-              <span>AGROBRIDGE</span>
+              <span>FARMER’S LISTED PRICE</span>
             </span>
             <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-teal-500/20 text-teal-300 border border-teal-500/40">
-              DIRECT
+              AGROBRIDGE DB
             </span>
           </div>
 
@@ -217,12 +312,12 @@ export default function SmartPriceComparisonContent({
               <span>₹{data.agroBridgePrice}</span>
               <span className="text-xs font-normal text-slate-400">/ kg</span>
             </div>
-            <div className="text-[11px] font-semibold text-teal-300 mt-0.5">Direct Farmer Price</div>
+            <div className="text-[11px] font-semibold text-teal-300 mt-0.5">Source: AgroBridge Farmer Listing</div>
           </div>
 
           <div className="pt-2 border-t border-slate-800 space-y-1 text-[11px]">
             <div className="text-emerald-400 flex items-center gap-1">
-              <span>✓</span> <span>Fresh Farm Gate Harvest</span>
+              <span>✓</span> <span>Direct Producer Farm Gate Rate</span>
             </div>
             <div className="text-emerald-400 flex items-center gap-1">
               <span>✓</span> <span>100% Transparent Price</span>
@@ -230,45 +325,86 @@ export default function SmartPriceComparisonContent({
           </div>
         </div>
 
-        {/* 2. LOCAL MARKET */}
-        <div className="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-3">
+        {/* 2. GOVERNMENT MANDI REFERENCE PRICE */}
+        <div className={`p-5 rounded-3xl space-y-3 ${
+          data.mandiAvailable 
+            ? 'bg-slate-900/90 border-2 border-rose-500/40 shadow-lg shadow-rose-500/5' 
+            : 'bg-slate-900/60 border border-slate-800'
+        }`}>
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-              <Store className="w-3.5 h-3.5 text-rose-400" />
-              <span>LOCAL MARKET</span>
+              <Building2 className="w-3.5 h-3.5 text-rose-400" />
+              <span>GOVT MANDI REFERENCE</span>
             </span>
-            <span className="text-[10px] font-bold text-rose-400">+{data.savingsPercentage}% higher</span>
+            {data.mandiAvailable ? (
+              <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-rose-500/20 text-rose-300 border border-rose-500/40 flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3" /> data.gov.in
+              </span>
+            ) : (
+              <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-slate-800 text-amber-400 border border-slate-700">
+                UNAVAILABLE
+              </span>
+            )}
           </div>
 
           <div>
-            <div className="text-3xl font-black text-slate-200 line-through decoration-rose-500 flex items-baseline gap-1">
-              <span>₹{data.marketPrice}</span>
-              <span className="text-xs font-normal text-slate-400">/ kg</span>
-            </div>
-            <div className="text-[11px] font-semibold text-slate-400 mt-0.5">Average Local Market Price</div>
+            {data.mandiAvailable ? (
+              <>
+                <div className="text-2xl sm:text-3xl font-black text-slate-200 flex items-baseline gap-1">
+                  <span>₹{data.mandiDetails?.modalPriceQuintal || (data.marketPrice * 100)}</span>
+                  <span className="text-xs font-normal text-slate-400">/ quintal</span>
+                </div>
+                <div className="text-[11px] font-semibold text-rose-300 mt-0.5">
+                  ≈ ₹{data.marketPrice}/kg equivalent
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="text-sm font-bold text-amber-400/90 mt-1">Government mandi price data is currently unavailable.</div>
+                <div className="text-[11px] text-slate-400 mt-0.5">No reported APMC modal price today</div>
+              </>
+            )}
           </div>
 
-          <div className="pt-2 border-t border-slate-800 text-[11px] text-slate-500">
-            Physical local mandi and neighborhood retail vendors.
+          <div className="pt-2 border-t border-slate-800 text-[11px] text-slate-400 space-y-0.5">
+            {data.mandiAvailable && data.mandiDetails ? (
+              <>
+                <div className="text-slate-300 font-medium">📍 {data.mandiDetails.market} Mandi ({data.mandiDetails.state})</div>
+                <div className="text-slate-500 text-[10px]">Date: {data.mandiDetails.arrivalDate} • Range: ₹{data.mandiDetails.minimumPrice || (data.mandiDetails.minPrice * 100)}–₹{data.mandiDetails.maximumPrice || (data.mandiDetails.maxPrice * 100)}/qtl</div>
+              </>
+            ) : (
+              <div className="text-slate-500 italic">
+                AgroBridge strictly refrains from fabricating synthetic prices when official data is absent.
+              </div>
+            )}
           </div>
         </div>
 
-        {/* 3. REGIONAL MARKET AVERAGE */}
+        {/* 3. REGIONAL MANDI AVERAGE */}
         <div className="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-              <Building2 className="w-3.5 h-3.5 text-amber-400" />
-              <span>MARKET AVERAGE</span>
+              <Store className="w-3.5 h-3.5 text-amber-400" />
+              <span>REGIONAL MANDI AVG</span>
             </span>
-            <span className="text-[10px] text-amber-400 font-semibold">Regional</span>
+            <span className="text-[10px] text-amber-400 font-semibold">State Mandis</span>
           </div>
 
           <div>
-            <div className="text-3xl font-black text-slate-300 flex items-baseline gap-1">
-              <span>₹{data.regionalAveragePrice}</span>
-              <span className="text-xs font-normal text-slate-400">/ kg</span>
-            </div>
-            <div className="text-[11px] font-semibold text-slate-400 mt-0.5">Average Regional Market Price</div>
+            {data.mandiAvailable && data.regionalAveragePrice ? (
+              <>
+                <div className="text-3xl font-black text-slate-300 flex items-baseline gap-1">
+                  <span>₹{data.regionalAveragePrice}</span>
+                  <span className="text-xs font-normal text-slate-400">/ kg</span>
+                </div>
+                <div className="text-[11px] font-semibold text-slate-400 mt-0.5">Average Regional Mandi Price</div>
+              </>
+            ) : (
+              <>
+                <div className="text-lg font-bold text-slate-400 mt-1">Data Unavailable</div>
+                <div className="text-[11px] text-slate-500 mt-0.5">Regional APMC updates pending</div>
+              </>
+            )}
           </div>
 
           <div className="pt-2 border-t border-slate-800 text-[11px] text-slate-500">
@@ -302,13 +438,229 @@ export default function SmartPriceComparisonContent({
 
       </div>
 
-      {/* SIH MVP Data Source Transparency Tag */}
-      <div className="flex items-center justify-between text-xs text-slate-400 bg-slate-950/80 p-3 rounded-2xl border border-slate-800">
-        <span className="flex items-center gap-2">
-          <Info className="w-4 h-4 text-amber-400" />
-          <span>Market reference prices are labeled as: <strong className="text-slate-200">{data.dataSource}</strong> for the SIH MVP.</span>
-        </span>
-        <span className="text-[10px] text-slate-500">Updated: Just now</span>
+      {/* Official Government Data Source Transparency Tag */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs text-slate-400 bg-slate-950/80 p-3.5 rounded-2xl border border-slate-800">
+        <div className="flex items-center gap-2">
+          <Info className="w-4 h-4 text-teal-400 shrink-0" />
+          <div>
+            <span className="text-slate-300 font-semibold">Government Mandi Reference Notice: </span>
+            <span>Government mandi prices are reference prices and may differ from the farmer’s listed price.</span>
+          </div>
+        </div>
+        <div className="text-[10px] text-slate-500 shrink-0 font-mono">
+          Source: Government of India OGD Platform (data.gov.in)
+        </div>
+      </div>
+
+      {/* INTERACTIVE GOVERNMENT MANDI MARKET PRICE EXPLORER */}
+      <div className="rounded-3xl bg-slate-900/90 border border-slate-800 p-5 sm:p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                <Building2 className="w-5 h-5 text-rose-400" />
+                <span>Government Mandi Price Explorer</span>
+              </h2>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3" /> data.gov.in
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Official Dataset: <em>"Current Daily Price of Various Commodities from Various Markets (Mandi)"</em>
+            </p>
+          </div>
+
+          {/* Cache Metadata Badge */}
+          {explorerResult?.cache && (
+            <div className="text-[11px] text-slate-400 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800 flex items-center gap-2">
+              <Clock className="w-3.5 h-3.5 text-teal-400" />
+              <span>Source Date: <strong>{explorerResult.cache.sourceDate || explorerResult.lastUpdated}</strong></span>
+              {explorerResult.cache.isStale && (
+                <span className="text-amber-400 font-semibold">• Outdated</span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Filter Controls: Commodity, State, District, Market */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Commodity Dropdown */}
+          <div className="space-y-1">
+            <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Commodity</label>
+            <select
+              value={explorerFilters.commodity}
+              onChange={(e) => {
+                const next = { ...explorerFilters, commodity: e.target.value };
+                setExplorerFilters(next);
+                fetchMandiExplorer(next);
+              }}
+              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-teal-500"
+            >
+              <option value="">All Commodities</option>
+              {filterOptions.commodities?.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* State Dropdown */}
+          <div className="space-y-1">
+            <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">State</label>
+            <select
+              value={explorerFilters.state}
+              onChange={(e) => {
+                const next = { ...explorerFilters, state: e.target.value };
+                setExplorerFilters(next);
+                fetchMandiExplorer(next);
+              }}
+              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-teal-500"
+            >
+              <option value="">All States</option>
+              {filterOptions.states?.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* District Dropdown */}
+          <div className="space-y-1">
+            <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">District</label>
+            <select
+              value={explorerFilters.district}
+              onChange={(e) => {
+                const next = { ...explorerFilters, district: e.target.value };
+                setExplorerFilters(next);
+                fetchMandiExplorer(next);
+              }}
+              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-teal-500"
+            >
+              <option value="">All Districts</option>
+              {filterOptions.districts?.map((d) => (
+                <option key={d} value={d}>{d}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Market Dropdown */}
+          <div className="space-y-1">
+            <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Mandi Market</label>
+            <select
+              value={explorerFilters.market}
+              onChange={(e) => {
+                const next = { ...explorerFilters, market: e.target.value };
+                setExplorerFilters(next);
+                fetchMandiExplorer(next);
+              }}
+              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-teal-500"
+            >
+              <option value="">All Mandi Markets</option>
+              {filterOptions.markets?.map((m) => (
+                <option key={m} value={m}>{m}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Reset Filter Action & Unit Conversion Indicator */}
+        <div className="flex items-center justify-between pt-1">
+          <div className="text-[11px] text-slate-400">
+            Conversion Standard: <code className="text-teal-400 font-mono">₹/kg = ₹/quintal ÷ 100</code>
+          </div>
+          {(explorerFilters.commodity || explorerFilters.state || explorerFilters.district || explorerFilters.market) && (
+            <button
+              onClick={() => {
+                const reset = { commodity: '', state: '', district: '', market: '' };
+                setExplorerFilters(reset);
+                fetchMandiExplorer(reset);
+              }}
+              className="text-xs text-slate-400 hover:text-white underline cursor-pointer"
+            >
+              Reset Filters
+            </button>
+          )}
+        </div>
+
+        {/* Explorer State Handling: Loading, Error, Empty, or Results */}
+        {explorerLoading ? (
+          <div className="py-12 text-center space-y-2">
+            <RefreshCw className="w-8 h-8 text-rose-400 animate-spin mx-auto" />
+            <div className="text-xs text-slate-300 font-semibold">Querying Government of India OGD Platform...</div>
+          </div>
+        ) : explorerError ? (
+          <div className="p-4 rounded-2xl bg-slate-950 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0" />
+            <span>Government mandi price data is currently unavailable.</span>
+          </div>
+        ) : !explorerResult || explorerResult.records?.length === 0 ? (
+          <div className="p-8 rounded-2xl bg-slate-950/60 border border-slate-800 text-center space-y-2">
+            <AlertCircle className="w-8 h-8 text-amber-400 mx-auto" />
+            <div className="text-xs font-semibold text-slate-200">
+              No government mandi price records found for the selected filters.
+            </div>
+            <p className="text-[11px] text-slate-500">
+              Try selecting a different state or commodity. AgroBridge strictly avoids displaying fabricated prices.
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="text-[11px] uppercase tracking-wider text-slate-400 border-b border-slate-800">
+                <tr>
+                  <th className="pb-2.5">Commodity & Variety</th>
+                  <th className="pb-2.5">Market & State</th>
+                  <th className="pb-2.5">Arrival Date</th>
+                  <th className="pb-2.5 text-right">Mandi Modal (₹/Qtl)</th>
+                  <th className="pb-2.5 text-right">Converted (₹/kg)</th>
+                  <th className="pb-2.5 text-right">Farmer’s Listed Price</th>
+                  <th className="pb-2.5 text-right">Price Difference</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60">
+                {explorerResult.records.map((r, idx) => {
+                  const modalQtl = r.modalPrice;
+                  const modalKg = r.modalPricePerKg;
+                  const farmerKg = data.agroBridgePrice;
+                  const isComparable = modalKg !== null && farmerKg !== null && r.commodity.toLowerCase() === (data.productName || '').toLowerCase().split(' ')[0];
+                  const diff = isComparable ? Math.round((modalKg - farmerKg) * 10) / 10 : null;
+
+                  return (
+                    <tr key={idx} className="hover:bg-slate-800/40 transition-colors">
+                      <td className="py-3">
+                        <div className="font-bold text-white">{r.commodity}</div>
+                        <div className="text-[10px] text-slate-400">{r.variety} • {r.grade}</div>
+                      </td>
+                      <td className="py-3">
+                        <div className="font-medium text-slate-200">📍 {r.market}</div>
+                        <div className="text-[10px] text-slate-400">{r.district}, {r.state}</div>
+                      </td>
+                      <td className="py-3 text-slate-300">
+                        <span>{r.arrivalDate}</span>
+                      </td>
+                      <td className="py-3 text-right font-mono font-bold text-slate-200">
+                        ₹{modalQtl?.toLocaleString('en-IN') || '—'}/qtl
+                      </td>
+                      <td className="py-3 text-right font-mono font-black text-rose-300">
+                        ₹{modalKg !== null ? modalKg : '—'}/kg
+                      </td>
+                      <td className="py-3 text-right font-mono font-bold text-teal-300">
+                        ₹{farmerKg}/kg
+                      </td>
+                      <td className="py-3 text-right font-mono">
+                        {isComparable ? (
+                          <span className={diff >= 0 ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold'}>
+                            {diff >= 0 ? `-₹${diff}/kg (Lower)` : `+₹${Math.abs(diff)}/kg`}
+                          </span>
+                        ) : (
+                          <span className="text-slate-500 text-[10px]">Price comparison is unavailable for these records.</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* CHARTS ROW: Recharts Bar Chart & Recharts Line Chart */}
@@ -356,10 +708,14 @@ export default function SmartPriceComparisonContent({
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-4 text-[11px] text-slate-400 pt-1">
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-teal-500 inline-block" /> AgroBridge (₹{data.agroBridgePrice})</span>
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-rose-500 inline-block" /> Local Market (₹{data.marketPrice})</span>
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-amber-500 inline-block" /> Regional Avg (₹{data.regionalAveragePrice})</span>
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-violet-500 inline-block" /> AI Fair (Avg)</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-teal-500 inline-block" /> 🌾 Farmer Direct (₹{data.agroBridgePrice})</span>
+            {data.mandiAvailable && data.marketPrice && (
+              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-rose-500 inline-block" /> 🏛️ APMC Mandi Govt (₹{data.marketPrice})</span>
+            )}
+            {data.mandiAvailable && data.regionalAveragePrice && (
+              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-amber-500 inline-block" /> 🏢 Regional Mandi Avg (₹{data.regionalAveragePrice})</span>
+            )}
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded bg-violet-500 inline-block" /> 🤖 AI Fair Range</span>
           </div>
         </div>
 
@@ -392,11 +748,11 @@ export default function SmartPriceComparisonContent({
                     fontSize: '12px',
                     color: '#fff'
                   }} 
-                  formatter={(val, name) => [`₹${val}/kg`, name === 'agroBridgePrice' ? 'AgroBridge' : 'Local Market']}
+                  formatter={(val, name) => [`₹${val}/kg`, name === 'agroBridgePrice' ? '🌾 Farmer Direct' : '🏛️ Govt Mandi']}
                 />
                 <Legend 
                   wrapperStyle={{ fontSize: '11px', paddingTop: '8px' }} 
-                  formatter={(val) => val === 'agroBridgePrice' ? 'AgroBridge Direct' : 'Local Market Reference'}
+                  formatter={(val) => val === 'agroBridgePrice' ? '🌾 Direct Farmer Price (AgroBridge DB)' : '🏛️ Govt APMC Mandi Benchmark'}
                 />
                 <Line 
                   type="monotone" 

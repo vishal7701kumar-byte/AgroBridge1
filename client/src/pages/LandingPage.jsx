@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import FutureInsightsChart from '../components/FutureInsightsChart';
 import { 
   Sprout, ArrowRight, ShieldCheck, MapPin, Truck, TrendingUp, 
   Sparkles, DollarSign, CheckCircle2, ChevronRight, Menu, X, 
   Users, ShoppingCart, Lock, Cpu, BarChart3, Clock, AlertTriangle, 
   Store, Building2, UserCheck, Shield, ChevronDown, Check, ArrowDown,
   ExternalLink, RefreshCw, Zap, Navigation, Award, Layers, Compass,
-  HelpCircle, FileText, Globe
+  HelpCircle, FileText, Globe, MessageSquare, PhoneCall, CloudRain,
+  Sun, Gift, Sparkle, HeartHandshake, ArrowUpRight
 } from 'lucide-react';
 
 export default function LandingPage({ onNavigate, currentUser }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeOfferTab, setActiveOfferTab] = useState('seasonal');
 
   const scrollToSection = (id) => {
     setMobileMenuOpen(false);
@@ -24,80 +25,249 @@ export default function LandingPage({ onNavigate, currentUser }) {
     {
       role: 'FARMER',
       title: 'Farmer',
-      tagline: 'Manage your farm, list crops, and sell directly with zero middleman deductions.',
-      emoji: '👨‍🌾',
-      route: '/farmer/login',
-      btnText: 'LOGIN AS FARMER',
+      tagline: 'Sell your crops directly at fair prices with zero middleman cuts, AI crop valuation & instant alerts.',
+      emoji: '🌾',
+      loginRoute: '/farmer/login',
+      registerRoute: '/farmer/register',
       badge: 'Primary Producer',
       glow: 'hover:border-emerald-500/60 hover:shadow-emerald-500/10',
       accent: 'text-emerald-400',
       btnBg: 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black',
-      features: ['List Crop Harvests Directly', 'AI 14-Day Price Advisory', 'AI Crop Quality Verification', 'Direct Wholesale Deal Matching']
+      features: [
+        'Direct Crop Harvest Listing',
+        'AI 14-Day Price Advisory & MSP',
+        'WhatsApp Assistant Notifications',
+        'IVR Missed Call Telephony (2G)'
+      ]
     },
     {
       role: 'CONSUMER',
       title: 'Consumer',
-      tagline: 'Shop farm-fresh produce with complete price transparency and live delivery tracking.',
+      tagline: 'Shop fresh produce harvested from local farms with full price transparency and live delivery tracking.',
       emoji: '🛒',
-      route: '/consumer/login',
-      btnText: 'LOGIN AS CONSUMER',
+      loginRoute: '/consumer/login',
+      registerRoute: '/consumer/register',
       badge: 'Farm-to-Table',
       glow: 'hover:border-teal-500/60 hover:shadow-teal-500/10',
       accent: 'text-teal-400',
       btnBg: 'bg-teal-500 hover:bg-teal-400 text-slate-950 font-black',
-      features: ['Browse Fresh Local Harvests', 'Compare Mandi vs Farm Prices', 'AgroBridge Assured Certified Produce', 'Live 3-Point GPS Delivery Map']
+      features: [
+        'Browse Hyperlocal Fresh Harvests',
+        'Direct Farm vs Mandi Price Transparency',
+        'AgroBridge Assured Quality Certification',
+        'Live 3-Point GPS Delivery Map'
+      ]
     },
     {
       role: 'BULK_BUYER',
       title: 'Bulk Buyer',
-      tagline: 'Source high-volume agricultural commodities directly with intelligent RFQ deal matching.',
+      tagline: 'Source commercial agricultural commodities directly with tiered volume discounts and smart deal matching.',
       emoji: '🏢',
-      route: '/bulk-buyer/login',
-      btnText: 'LOGIN AS BULK BUYER',
+      loginRoute: '/bulk-buyer/login',
+      registerRoute: '/bulk-buyer/register',
       badge: 'Commercial / B2B',
       glow: 'hover:border-indigo-500/60 hover:shadow-indigo-500/10',
       accent: 'text-indigo-400',
       btnBg: 'bg-indigo-500 hover:bg-indigo-400 text-white font-black',
-      features: ['Procure Volume Tiers with Discounts', 'MCDA Best Deal Supplier Matching', 'Smart Price Negotiation Bot', 'Scheduled Fleet Deliveries']
+      features: [
+        'Procure Volume Tiers with Discounts',
+        'MCDA Supplier Deal Matching',
+        'Direct RFP & Scheduled Deliveries',
+        'Institutional Escrow Contract Settlement'
+      ]
     },
     {
       role: 'DRIVER',
       title: 'Driver Partner',
-      tagline: 'Empowering rural logistics with AI route optimization and dual-OTP verified handovers.',
+      tagline: 'Empowering rural logistics partners with AI route compaction, zero deadhead miles & instant escrow payouts.',
       emoji: '🚚',
-      route: '/driver/login',
-      btnText: 'LOGIN AS DRIVER',
+      loginRoute: '/driver/login',
+      registerRoute: '/driver/register',
       badge: 'Smart Rural Logistics',
       glow: 'hover:border-amber-500/60 hover:shadow-amber-500/10',
       accent: 'text-amber-400',
       btnBg: 'bg-amber-500 hover:bg-amber-400 text-slate-950 font-black',
-      features: ['AI Route Optimization (33% Distance Saved)', 'Farm Gate Pickup OTP Verification', 'Turn-by-Turn Delivery Navigation', 'Instant Escrow Handover Payouts']
+      features: [
+        'AI Route Optimization (33% Distance Saved)',
+        'Farm Gate Pickup OTP Verification',
+        'Turn-by-Turn Waypoint Navigation',
+        'Instant Dropoff Escrow Payouts'
+      ]
     },
     {
       role: 'ADMIN',
       title: 'Admin / APMC',
-      tagline: 'Centralized oversight, farmer compliance audits, and platform telemetry monitoring.',
-      emoji: '👨‍💼',
-      route: '/admin/login',
-      btnText: 'ADMIN LOGIN',
+      tagline: 'Centralized oversight, farmer compliance verification, dispute resolution, and platform operations.',
+      emoji: '🛡️',
+      loginRoute: '/admin/login',
+      registerRoute: null,
       badge: 'System Governance',
       glow: 'hover:border-violet-500/60 hover:shadow-violet-500/10',
       accent: 'text-violet-400',
       btnBg: 'bg-violet-500 hover:bg-violet-400 text-white font-black',
-      features: ['Central Operations Audit & Telemetry', 'Farmer Verification & Sanction Toggles', 'Product Moderation & Quality Signoff', 'Consumer Dispute & Escrow Resolution']
+      features: [
+        'Central Operations Telemetry & Audit',
+        'Farmer KYC Verification & Approvals',
+        'AI Campaign & Offer Management',
+        'Consumer Escrow Dispute Resolution'
+      ]
     }
   ];
+
+  const keyFeatures = [
+    {
+      title: 'AI Price Intelligence',
+      tagline: '14-day price forecasting & APMC benchmark tracking to protect farmer margins.',
+      icon: TrendingUp,
+      accent: 'text-emerald-400',
+      bg: 'bg-emerald-500/10 border-emerald-500/20'
+    },
+    {
+      title: 'Smart Offers',
+      tagline: 'Weather-driven, festive, and seasonal discounts dynamically matched to harvest supply.',
+      icon: Sparkles,
+      accent: 'text-teal-400',
+      bg: 'bg-teal-500/10 border-teal-500/20'
+    },
+    {
+      title: 'Direct Marketplace',
+      tagline: 'Seamless farm-gate to consumer purchase channels eliminating commission brokers.',
+      icon: Sprout,
+      accent: 'text-cyan-400',
+      bg: 'bg-cyan-500/10 border-cyan-500/20'
+    },
+    {
+      title: 'Smart Logistics',
+      tagline: 'Automated driver dispatch matching capacity and distance with 33% saved transit mileage.',
+      icon: Navigation,
+      accent: 'text-indigo-400',
+      bg: 'bg-indigo-500/10 border-indigo-500/20'
+    },
+    {
+      title: 'Live Tracking',
+      tagline: 'Real-time 3-point GPS telemetry showing farm pickup, driver transit, and doorstep delivery.',
+      icon: MapPin,
+      accent: 'text-amber-400',
+      bg: 'bg-amber-500/10 border-amber-500/20'
+    },
+    {
+      title: 'Farmer Profit Analytics',
+      tagline: 'Deep visibility into profit margins, disintermediation savings, and crop revenue trends.',
+      icon: BarChart3,
+      accent: 'text-rose-400',
+      bg: 'bg-rose-500/10 border-rose-500/20'
+    },
+    {
+      title: 'WhatsApp Assistant',
+      tagline: 'Instant order alerts, inventory updates, and crop advice via WhatsApp without installing any app.',
+      icon: MessageSquare,
+      accent: 'text-green-400',
+      bg: 'bg-green-500/10 border-green-500/20'
+    },
+    {
+      title: 'IVR Accessibility',
+      tagline: 'Toll-free missed-call callback and bilingual voice telephony for farmers on basic feature phones.',
+      icon: PhoneCall,
+      accent: 'text-purple-400',
+      bg: 'bg-purple-500/10 border-purple-500/20'
+    }
+  ];
+
+  const smartOfferItems = [
+    {
+      id: 'seasonal',
+      tabLabel: 'Seasonal Offers',
+      icon: Sun,
+      title: 'Summer Harvest Freshness Pass',
+      category: 'Seasonal Recommendation',
+      tag: 'AI-Assisted',
+      highlight: 'Up to 24% Off Mandi Rates',
+      description: 'Algorithmic bundling of seasonal produce at peak harvest window when crop sweetness is optimal and post-harvest shelf life is highest.',
+      metrics: [
+        { label: 'Harvest Age', val: '< 8 hrs' },
+        { label: 'Shelf Life Score', val: '96/100' },
+        { label: 'Farmer Direct Payout', val: '78%' }
+      ],
+      sampleProducts: ['Ratnagiri Alphonso Mango', 'Fresh Sweet Corn', 'Crisp Cucumbers']
+    },
+    {
+      id: 'weather',
+      tabLabel: 'Weather-Based Offers',
+      icon: CloudRain,
+      title: 'Pre-Monsoon Crop Storage Liquidation',
+      category: 'Weather-Triggered Dynamic Pricing',
+      tag: 'AI-Assisted',
+      highlight: 'Moisture Risk Pre-Emption',
+      description: 'Dynamic price adjustments triggered by impending rainfall telemetry in Central MP, safeguarding farmers against moisture loss while delivering grocery value.',
+      metrics: [
+        { label: 'Rain Telemetry', val: 'Heavy in 48h' },
+        { label: 'Risk Mitigation', val: 'High Priority' },
+        { label: 'Buyer Discount', val: '18% Instant' }
+      ],
+      sampleProducts: ['Pukhraj Potatoes', 'Desi Onions', 'Dry Garlic Bulbs']
+    },
+    {
+      id: 'festival',
+      tabLabel: 'Festival Offers',
+      icon: Gift,
+      title: 'Navratri & Diwali Festive Food Hamper',
+      category: 'Festive Surge Planning',
+      tag: 'AI-Assisted',
+      highlight: 'Curated Ritual Freshness',
+      description: 'Pre-harvest contract deals for high-demand festive staples, matching urban demand surges directly to regional grower clusters with locked pricing.',
+      metrics: [
+        { label: 'Surge Projection', val: '+45% Demand' },
+        { label: 'Locked Floor MSP', val: 'Guaranteed' },
+        { label: 'Household Savings', val: '₹140 / pack' }
+      ],
+      sampleProducts: ['Organic Rock Salt Produce', 'Fresh Sabudana Batches', 'Green Cardamom']
+    },
+    {
+      id: 'forecast',
+      tabLabel: 'Demand Forecast',
+      icon: TrendingUp,
+      title: '14-Day Demand & Price Forecasting',
+      category: 'Predictive Market Trend',
+      tag: 'AI-Assisted',
+      highlight: 'Forward Price Lock Advisory',
+      description: 'Multi-variable time series projection advising buyers to procure upcoming crop cycles ahead of expected mandi price inflation.',
+      metrics: [
+        { label: 'Confidence Score', val: '94.2%' },
+        { label: 'Mandi Trend', val: 'Bullish (+12%)' },
+        { label: 'Harvest Window', val: 'Next 5-10 Days' }
+      ],
+      sampleProducts: ['Hybrid Red Tomatoes', 'Nashik Red Onions', 'Shimla Green Apples']
+    },
+    {
+      id: 'personalized',
+      tabLabel: 'Personalized Deals',
+      icon: HeartHandshake,
+      title: 'Curated Farm-to-Doorstep Subscriptions',
+      category: 'Behavioral Recommendation',
+      tag: 'AI-Assisted',
+      highlight: 'Tailored Weekly Farm Baskets',
+      description: 'Algorithmic matching of household consumption frequencies to nearby farmers cultivating certified Grade A produce within a 25km radius.',
+      metrics: [
+        { label: 'Transit Distance', val: '< 18 km' },
+        { label: 'Delivery Schedule', val: 'Twice Weekly' },
+        { label: 'Net Annual Savings', val: '₹8,400+' }
+      ],
+      sampleProducts: ['Mixed Salad Greens', 'Organic Cherry Tomatoes', 'Fresh Farm Mint']
+    }
+  ];
+
+  const currentOffer = smartOfferItems.find(item => item.id === activeOfferTab) || smartOfferItems[0];
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-emerald-500 selection:text-slate-950 overflow-x-hidden font-sans">
 
       {/* ========================================================================= */}
-      {/* 1. STICKY NAVIGATION BAR */}
+      {/* 1. NAVBAR */}
       {/* ========================================================================= */}
       <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-slate-950/90 border-b border-slate-800/80 transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           
-          {/* Brand Logo & Tagline */}
+          {/* AgroBridge Logo */}
           <div 
             onClick={() => scrollToSection('hero')}
             className="flex items-center gap-3.5 cursor-pointer group select-none"
@@ -114,35 +284,50 @@ export default function LandingPage({ onNavigate, currentUser }) {
                   SIH26033
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 font-medium tracking-wide">Connecting Farmers. Consumers. Technology.</p>
+              <p className="text-[11px] text-slate-400 font-medium tracking-wide">Connecting Farmers Directly to Consumers</p>
             </div>
           </div>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
-            {[
-              { label: 'Home', id: 'hero' },
-              { label: 'About Us', id: 'problem' },
-              { label: 'How It Works', id: 'how-it-works' },
-              { label: 'Features', id: 'features' },
-              { label: 'Why AgroBridge', id: 'why-agrobridge' },
-              { label: 'Comparison', id: 'comparison' },
-              { label: 'References', id: 'references' }
-            ].map(item => (
-              <button
-                key={item.id}
-                onClick={() => scrollToSection(item.id)}
-                className="px-3 py-2 text-xs xl:text-sm font-semibold text-slate-300 hover:text-emerald-400 rounded-xl hover:bg-slate-900/60 transition-colors"
-              >
-                {item.label}
-              </button>
-            ))}
+          {/* Clean Navigation Links */}
+          <nav className="hidden lg:flex items-center gap-2 xl:gap-3">
+            <button
+              onClick={() => scrollToSection('hero')}
+              className="px-3.5 py-2 text-sm font-semibold text-slate-300 hover:text-emerald-400 rounded-xl hover:bg-slate-900/60 transition-colors"
+            >
+              Home
+            </button>
+            <button
+              onClick={() => onNavigate('/consumer/login')}
+              className="px-3.5 py-2 text-sm font-semibold text-slate-300 hover:text-emerald-400 rounded-xl hover:bg-slate-900/60 transition-colors flex items-center gap-1.5"
+            >
+              <span>Marketplace</span>
+              <ArrowUpRight className="w-3.5 h-3.5 text-slate-500" />
+            </button>
+            <button
+              onClick={() => scrollToSection('features')}
+              className="px-3.5 py-2 text-sm font-semibold text-slate-300 hover:text-emerald-400 rounded-xl hover:bg-slate-900/60 transition-colors"
+            >
+              About
+            </button>
+            <button
+              onClick={() => scrollToSection('smart-offers')}
+              className="px-3.5 py-2 text-sm font-semibold text-slate-300 hover:text-emerald-400 rounded-xl hover:bg-slate-900/60 transition-colors flex items-center gap-1.5"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-teal-400" />
+              <span>Smart Offers</span>
+            </button>
+            <button
+              onClick={() => scrollToSection('accessibility')}
+              className="px-3.5 py-2 text-sm font-semibold text-slate-300 hover:text-emerald-400 rounded-xl hover:bg-slate-900/60 transition-colors"
+            >
+              Accessibility
+            </button>
           </nav>
 
           {/* Header Action Buttons */}
           <div className="hidden sm:flex items-center gap-3">
             <button
-              onClick={() => scrollToSection('login')}
+              onClick={() => onNavigate('/login')}
               className="px-4 py-2 text-xs sm:text-sm font-bold text-slate-200 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-700/80 rounded-xl shadow-sm transition-all"
             >
               Login
@@ -159,7 +344,7 @@ export default function LandingPage({ onNavigate, currentUser }) {
           {/* Mobile Hamburger Toggle */}
           <div className="lg:hidden flex items-center gap-2">
             <button
-              onClick={() => scrollToSection('login')}
+              onClick={() => onNavigate('/login')}
               className="sm:hidden px-3 py-1.5 text-xs font-bold text-slate-950 bg-emerald-400 rounded-lg"
             >
               Login
@@ -178,33 +363,48 @@ export default function LandingPage({ onNavigate, currentUser }) {
         {/* Mobile Dropdown Menu */}
         {mobileMenuOpen && (
           <div className="lg:hidden border-b border-slate-800 bg-slate-950/98 px-5 py-4 space-y-2 animate-fadeIn">
-            {[
-              { label: 'Home', id: 'hero' },
-              { label: 'About Us', id: 'problem' },
-              { label: 'How It Works', id: 'how-it-works' },
-              { label: 'Features', id: 'features' },
-              { label: 'Why AgroBridge', id: 'why-agrobridge' },
-              { label: 'Comparison', id: 'comparison' },
-              { label: 'References', id: 'references' }
-            ].map(item => (
-              <button
-                key={item.id}
-                onClick={() => scrollToSection(item.id)}
-                className="w-full text-left px-3 py-2 text-sm font-semibold text-slate-300 hover:text-emerald-400 rounded-lg hover:bg-slate-900/60 transition-colors"
-              >
-                {item.label}
-              </button>
-            ))}
+            <button
+              onClick={() => scrollToSection('hero')}
+              className="w-full text-left px-3 py-2 text-sm font-semibold text-slate-300 hover:text-emerald-400 rounded-lg hover:bg-slate-900/60 transition-colors"
+            >
+              Home
+            </button>
+            <button
+              onClick={() => { setMobileMenuOpen(false); onNavigate('/consumer/login'); }}
+              className="w-full text-left px-3 py-2 text-sm font-semibold text-slate-300 hover:text-emerald-400 rounded-lg hover:bg-slate-900/60 transition-colors flex items-center justify-between"
+            >
+              <span>Marketplace</span>
+              <ArrowUpRight className="w-4 h-4 text-slate-500" />
+            </button>
+            <button
+              onClick={() => scrollToSection('features')}
+              className="w-full text-left px-3 py-2 text-sm font-semibold text-slate-300 hover:text-emerald-400 rounded-lg hover:bg-slate-900/60 transition-colors"
+            >
+              About
+            </button>
+            <button
+              onClick={() => scrollToSection('smart-offers')}
+              className="w-full text-left px-3 py-2 text-sm font-semibold text-slate-300 hover:text-emerald-400 rounded-lg hover:bg-slate-900/60 transition-colors flex items-center gap-1.5"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-teal-400" />
+              <span>Smart Offers</span>
+            </button>
+            <button
+              onClick={() => scrollToSection('accessibility')}
+              className="w-full text-left px-3 py-2 text-sm font-semibold text-slate-300 hover:text-emerald-400 rounded-lg hover:bg-slate-900/60 transition-colors"
+            >
+              Accessibility
+            </button>
             <div className="pt-3 border-t border-slate-800 flex gap-2">
               <button
-                onClick={() => scrollToSection('login')}
-                className="flex-1 py-2 text-xs font-bold text-slate-200 bg-slate-900 border border-slate-700 rounded-xl"
+                onClick={() => { setMobileMenuOpen(false); onNavigate('/login'); }}
+                className="flex-1 py-2 text-xs font-bold text-slate-200 bg-slate-900 border border-slate-700 rounded-xl text-center"
               >
                 Login
               </button>
               <button
                 onClick={() => scrollToSection('roles')}
-                className="flex-1 py-2 text-xs font-black text-slate-950 bg-emerald-400 rounded-xl shadow-md shadow-emerald-500/20"
+                className="flex-1 py-2 text-xs font-black text-slate-950 bg-emerald-400 rounded-xl shadow-md shadow-emerald-500/20 text-center"
               >
                 Get Started
               </button>
@@ -230,162 +430,181 @@ export default function LandingPage({ onNavigate, currentUser }) {
               {/* Highlight Badges */}
               <div className="inline-flex flex-wrap items-center justify-center lg:justify-start gap-2 p-1.5 rounded-full bg-slate-900/90 border border-emerald-500/30 text-xs shadow-inner">
                 <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 font-bold border border-emerald-500/30">
-                  <span>🌾</span> Direct Farmer Marketplace
+                  <span>🌾</span> Direct Farm Sourcing
                 </span>
                 <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/15 text-teal-300 font-bold border border-teal-500/30">
-                  <span>🤖</span> AI-Assisted Insights
+                  <span>🤖</span> AI-Assisted Intelligence
                 </span>
                 <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 text-amber-300 font-bold border border-amber-500/30">
                   <span>🚚</span> Smart Logistics
                 </span>
                 <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/15 text-cyan-300 font-bold border border-cyan-500/30">
-                  <span>💰</span> Transparent Pricing
+                  <span>💰</span> Zero Middlemen
                 </span>
               </div>
 
-              {/* Exact Prompt Headline */}
+              {/* Exact Requested Headline */}
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
                 Connecting Farmers{' '}
                 <span className="block text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">
-                  Directly to Consumers.
+                  Directly to Consumers
                 </span>
               </h1>
 
-              {/* Subheading */}
+              {/* Exact Requested Subheadline */}
               <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal">
-                A modern AI-assisted agricultural marketplace streamlining the farm-to-table journey with real-time price transparency, intelligent logistics routing, and direct market access for rural producers and urban buyers.
+                An AI-assisted agricultural marketplace connecting farmers, consumers, bulk buyers and logistics in one integrated ecosystem.
               </p>
 
-              {/* Call to Actions */}
+              {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
                 <button
-                  onClick={() => scrollToSection('features')}
+                  onClick={() => onNavigate('/consumer/login')}
                   className="w-full sm:w-auto px-8 py-4 text-sm font-black text-slate-950 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 hover:brightness-110 rounded-2xl shadow-xl shadow-emerald-500/25 active:scale-95 transition-all flex items-center justify-center gap-2"
                 >
-                  <span>Explore Platform</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ShoppingCart className="w-4 h-4" />
+                  <span>Explore Marketplace</span>
                 </button>
                 <button
-                  onClick={() => scrollToSection('login')}
+                  onClick={() => scrollToSection('roles')}
                   className="w-full sm:w-auto px-8 py-4 text-sm font-bold text-slate-200 hover:text-white bg-slate-900/90 hover:bg-slate-800 border border-slate-700/80 rounded-2xl shadow-sm transition-all flex items-center justify-center gap-2"
                 >
-                  <span>Login / Choose Role</span>
-                  <Users className="w-4 h-4 text-emerald-400" />
+                  <span>Get Started</span>
+                  <ChevronRight className="w-4 h-4 text-emerald-400" />
                 </button>
               </div>
 
-              {/* Platform Metrics Highlights */}
+              {/* Key Platform Value Indicators */}
               <div className="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-4 border-t border-slate-800/80 text-left">
-                <div className="bg-slate-900/40 p-3 rounded-xl border border-slate-800/50">
-                  <div className="text-xl font-black text-emerald-400">5 Roles</div>
-                  <div className="text-xs text-slate-400 mt-0.5">Unified Portals</div>
+                <div className="bg-slate-900/50 p-3.5 rounded-2xl border border-slate-800/60">
+                  <div className="text-2xl font-black text-emerald-400">0% Cut</div>
+                  <div className="text-xs text-slate-400 mt-0.5">No Middleman Fees</div>
                 </div>
-                <div className="bg-slate-900/40 p-3 rounded-xl border border-slate-800/50">
-                  <div className="text-xl font-black text-teal-400">0% Cut</div>
-                  <div className="text-xs text-slate-400 mt-0.5">Middlemen Fees</div>
+                <div className="bg-slate-900/50 p-3.5 rounded-2xl border border-slate-800/60">
+                  <div className="text-2xl font-black text-teal-400">14-Day</div>
+                  <div className="text-xs text-slate-400 mt-0.5">AI Price Forecast</div>
                 </div>
-                <div className="bg-slate-900/40 p-3 rounded-xl border border-slate-800/50">
-                  <div className="text-xl font-black text-amber-400">33% Saved</div>
-                  <div className="text-xs text-slate-400 mt-0.5">Route Distance</div>
+                <div className="bg-slate-900/50 p-3.5 rounded-2xl border border-slate-800/60">
+                  <div className="text-2xl font-black text-amber-400">33% Saved</div>
+                  <div className="text-xs text-slate-400 mt-0.5">Logistics Route Path</div>
                 </div>
-                <div className="bg-slate-900/40 p-3 rounded-xl border border-slate-800/50">
-                  <div className="text-xl font-black text-cyan-400">100% Escrow</div>
+                <div className="bg-slate-900/50 p-3.5 rounded-2xl border border-slate-800/60">
+                  <div className="text-2xl font-black text-cyan-400">100% Escrow</div>
                   <div className="text-xs text-slate-400 mt-0.5">Dual-OTP Security</div>
                 </div>
               </div>
 
             </div>
 
-            {/* Right Interactive Visual Flow Card */}
+            {/* Right Agritech Hero Visual Showcase */}
             <div className="lg:col-span-5">
-              <div className="relative rounded-3xl bg-gradient-to-b from-slate-900 via-slate-900/90 to-slate-950 border border-slate-800 p-6 sm:p-8 shadow-2xl shadow-emerald-500/10">
+              <div className="relative rounded-3xl bg-gradient-to-b from-slate-900 via-slate-900/90 to-slate-950 border border-slate-800 p-6 sm:p-7 shadow-2xl shadow-emerald-500/10">
                 
-                <div className="flex items-center justify-between pb-5 border-b border-slate-800">
+                {/* Header status */}
+                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
                   <div className="flex items-center gap-2">
-                    <span className="w-3 h-3 rounded-full bg-emerald-500 animate-ping" />
-                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Live Supply Chain Pipeline</span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">AgroBridge Live Ecosystem</span>
                   </div>
-                  <span className="text-[11px] px-2.5 py-1 rounded-full bg-slate-800 text-slate-400 font-mono">AgroBridge Flow</span>
+                  <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 font-mono">Real-Time Hub</span>
                 </div>
 
-                {/* Vertical Step Workflow Visual */}
-                <div className="py-6 space-y-4 relative">
-                  <div className="absolute left-6 top-8 bottom-8 w-0.5 bg-gradient-to-b from-emerald-500 via-teal-500 to-amber-500 opacity-30" />
-
-                  {/* Node 1: Farmer */}
-                  <div className="relative flex items-center gap-4 p-3 rounded-2xl bg-slate-950/70 border border-emerald-500/30">
-                    <div className="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xl shrink-0 z-10">
-                      👨‍🌾
+                {/* Direct Supply Chain Flow Showcase */}
+                <div className="py-5 space-y-3 relative">
+                  
+                  {/* Step 1: Farmer */}
+                  <div className="p-3 rounded-2xl bg-slate-950/80 border border-emerald-500/30 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg">
+                        🌾
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-white">Direct Farm Listing</div>
+                        <div className="text-[11px] text-slate-400">Fresh harvest priced at fair base MSP</div>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <div className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Origin: Rural Producer</div>
-                      <div className="text-sm font-bold text-white">Farmer / FPO Cluster</div>
-                      <div className="text-[11px] text-slate-400">Direct crop harvest listing at fair base MSP</div>
-                    </div>
+                    <span className="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md">
+                      78% Return
+                    </span>
                   </div>
 
-                  {/* Flow Indicator */}
-                  <div className="flex justify-center -my-2 relative z-10">
-                    <div className="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 text-xs">
-                      ↓
-                    </div>
+                  {/* Flow Arrow */}
+                  <div className="flex justify-center text-slate-600 text-xs -my-1">
+                    ↓
                   </div>
 
-                  {/* Node 2: AgroBridge Marketplace & AI */}
-                  <div className="relative flex items-center gap-4 p-3 rounded-2xl bg-slate-950/70 border border-teal-500/30">
-                    <div className="w-12 h-12 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center font-bold text-xl shrink-0 z-10">
-                      🤖
+                  {/* Step 2: AI Core */}
+                  <div className="p-3 rounded-2xl bg-slate-950/80 border border-teal-500/30 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-lg">
+                        🤖
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-white">AI Price & Demand Engine</div>
+                        <div className="text-[11px] text-slate-400">Mandi comparison & Smart Offers</div>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <div className="text-xs font-bold text-teal-400 uppercase tracking-wider">Intelligent Core</div>
-                      <div className="text-sm font-bold text-white">Digital Marketplace & AI Pricing</div>
-                      <div className="text-[11px] text-slate-400">Demand forecast, fair-price comparison, deal match</div>
-                    </div>
+                    <span className="text-[11px] font-bold text-teal-400 bg-teal-500/10 px-2 py-0.5 rounded-md">
+                      AI-Assisted
+                    </span>
                   </div>
 
-                  {/* Flow Indicator */}
-                  <div className="flex justify-center -my-2 relative z-10">
-                    <div className="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 text-xs">
-                      ↓
-                    </div>
+                  {/* Flow Arrow */}
+                  <div className="flex justify-center text-slate-600 text-xs -my-1">
+                    ↓
                   </div>
 
-                  {/* Node 3: Consumer & Bulk Buyer */}
-                  <div className="relative flex items-center gap-4 p-3 rounded-2xl bg-slate-950/70 border border-cyan-500/30">
-                    <div className="w-12 h-12 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xl shrink-0 z-10">
-                      🛒
+                  {/* Step 3: Smart Logistics */}
+                  <div className="p-3 rounded-2xl bg-slate-950/80 border border-amber-500/30 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg">
+                        🚚
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-white">Smart Rural Logistics</div>
+                        <div className="text-[11px] text-slate-400">Leaflet GPS map & dual-OTP escrow</div>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <div className="text-xs font-bold text-cyan-400 uppercase tracking-wider">Terminal Demand</div>
-                      <div className="text-sm font-bold text-white">Consumer & Bulk Buyer</div>
-                      <div className="text-[11px] text-slate-400">Farm-to-table groceries & B2B procurement</div>
-                    </div>
+                    <span className="text-[11px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md">
+                      33% Compact
+                    </span>
                   </div>
 
-                  {/* Flow Indicator */}
-                  <div className="flex justify-center -my-2 relative z-10">
-                    <div className="w-6 h-6 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 text-xs">
-                      ↓
-                    </div>
+                  {/* Flow Arrow */}
+                  <div className="flex justify-center text-slate-600 text-xs -my-1">
+                    ↓
                   </div>
 
-                  {/* Node 4: Smart Logistics */}
-                  <div className="relative flex items-center gap-4 p-3 rounded-2xl bg-slate-950/70 border border-amber-500/30">
-                    <div className="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xl shrink-0 z-10">
-                      🚚
+                  {/* Step 4: Consumer Delivery */}
+                  <div className="p-3 rounded-2xl bg-slate-950/80 border border-cyan-500/30 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-lg">
+                        🛒
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-white">Consumer & Bulk Buyer</div>
+                        <div className="text-[11px] text-slate-400">Grade A produce delivered to doorstep</div>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <div className="text-xs font-bold text-amber-400 uppercase tracking-wider">Fulfillment</div>
-                      <div className="text-sm font-bold text-white">Smart Logistics & Live Tracking</div>
-                      <div className="text-[11px] text-slate-400">Leaflet 3-point GPS map & Dual-OTP escrow</div>
-                    </div>
+                    <span className="text-[11px] font-bold text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-md">
+                      22% Saved
+                    </span>
                   </div>
 
                 </div>
 
-                <div className="pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-                  <span>Supply Chain Efficiency</span>
-                  <span className="font-bold text-emerald-400">Optimized Farm-to-Fork</span>
+                {/* Card Footer */}
+                <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+                  <span className="flex items-center gap-1 text-slate-400">
+                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                    <span>Verified Farm-to-Fork Protocol</span>
+                  </span>
+                  <button 
+                    onClick={() => onNavigate('/login')}
+                    className="font-bold text-emerald-400 hover:text-emerald-300 transition-colors"
+                  >
+                    Enter Platform →
+                  </button>
                 </div>
 
               </div>
@@ -396,590 +615,20 @@ export default function LandingPage({ onNavigate, currentUser }) {
       </section>
 
       {/* ========================================================================= */}
-      {/* 3. PROBLEM SECTION */}
-      {/* ========================================================================= */}
-      <section id="problem" className="py-20 bg-slate-900/40 border-y border-slate-800/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          
-          <div className="text-center max-w-3xl mx-auto space-y-4">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-rose-400 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20">
-              Supply Chain Friction
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-white">
-              The Traditional Supply Chain Breakdown
-            </h2>
-            <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              Agricultural commodities currently pass through multiple speculative layers before reaching consumer plates, increasing waste and inflating retail markups.
-            </p>
-          </div>
-
-          {/* Traditional Intermediary Horizontal Flowchart */}
-          <div className="p-6 rounded-3xl bg-slate-950 border border-slate-800 overflow-x-auto">
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-rose-400" />
-              <span>Conventional Multi-Tier Agricultural Distribution (Fragmented & Opaque)</span>
-            </div>
-            
-            <div className="flex items-center min-w-[760px] justify-between text-center gap-2 text-xs">
-              <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex-1">
-                <div className="text-base mb-1">👨‍🌾</div>
-                <div className="font-bold text-white">Farmer</div>
-                <div className="text-[10px] text-rose-400">Receives 30-35%</div>
-              </div>
-              <div className="text-slate-600 font-bold">➔</div>
-              <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex-1">
-                <div className="text-base mb-1">⚖️</div>
-                <div className="font-bold text-slate-300">Commission Agent</div>
-                <div className="text-[10px] text-slate-400">+8-12% Cut</div>
-              </div>
-              <div className="text-slate-600 font-bold">➔</div>
-              <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex-1">
-                <div className="text-base mb-1">🏛️</div>
-                <div className="font-bold text-slate-300">APMC Mandi Wholesaler</div>
-                <div className="text-[10px] text-slate-400">+15-20% Markup</div>
-              </div>
-              <div className="text-slate-600 font-bold">➔</div>
-              <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex-1">
-                <div className="text-base mb-1">📦</div>
-                <div className="font-bold text-slate-300">Regional Sub-Wholesaler</div>
-                <div className="text-[10px] text-slate-400">+10-15% Markup</div>
-              </div>
-              <div className="text-slate-600 font-bold">➔</div>
-              <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 flex-1">
-                <div className="text-base mb-1">🏪</div>
-                <div className="font-bold text-slate-300">Local Retailer</div>
-                <div className="text-[10px] text-slate-400">+20-30% Margin</div>
-              </div>
-              <div className="text-slate-600 font-bold">➔</div>
-              <div className="p-3 rounded-xl bg-slate-900 border border-rose-500/30 flex-1">
-                <div className="text-base mb-1">🛒</div>
-                <div className="font-bold text-white">Consumer</div>
-                <div className="text-[10px] text-rose-400">Pays 250-300%</div>
-              </div>
-            </div>
-            <div className="mt-4 pt-3 border-t border-slate-800/80 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2">
-              <span className="text-rose-400 font-medium">⚠️ 40%–60% of retail price consumed by speculative intermediaries</span>
-              <span className="text-amber-400 font-medium">⚠️ 20%–30% post-harvest transit losses due to uncoordinated logistics</span>
-            </div>
-          </div>
-
-          {/* 5 Problem Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            
-            <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2 hover:border-slate-700 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center font-bold">
-                <DollarSign className="w-5 h-5" />
-              </div>
-              <h3 className="text-sm font-bold text-white">Limited Price Transparency</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Farmers lack direct terminal market visibility, accepting lowball prices while consumers face arbitrary retail markups.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2 hover:border-slate-700 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold">
-                <Users className="w-5 h-5" />
-              </div>
-              <h3 className="text-sm font-bold text-white">Multiple Intermediaries</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                4 to 6 tiers of brokers and commission agents extract margin at every step without contributing real value or freshness.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2 hover:border-slate-700 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center font-bold">
-                <Truck className="w-5 h-5" />
-              </div>
-              <h3 className="text-sm font-bold text-white">Logistics Challenges</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Unorganized rural freight, empty return journeys, and lack of real-time route optimization cause high transit waste.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2 hover:border-slate-700 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold">
-                <MapPin className="w-5 h-5" />
-              </div>
-              <h3 className="text-sm font-bold text-white">Limited Market Reach</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Smallholder farmers remain confined to mandis within a 15km radius, missing out on higher urban and commercial demand.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2 hover:border-slate-700 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center font-bold">
-                <TrendingUp className="w-5 h-5" />
-              </div>
-              <h3 className="text-sm font-bold text-white">Lack of Demand Insights</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Cultivation and harvest decisions occur without actionable predictive insights, resulting in recurring glut and price crashes.
-              </p>
-            </div>
-
-          </div>
-
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 4. AGROBRIDGE SOLUTION SECTION */}
-      {/* ========================================================================= */}
-      <section id="solution" className="py-20 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          
-          <div className="text-center max-w-3xl mx-auto space-y-4">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-400 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-              The AgroBridge Solution
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-white">
-              One Unified Agricultural Ecosystem
-            </h2>
-            <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              AgroBridge directly bridges rural producers with urban consumers and bulk commercial purchasers, coordinated by algorithmic dispatch and transparent pricing.
-            </p>
-          </div>
-
-          {/* Direct Ecosystem Solution Card */}
-          <div className="p-8 rounded-3xl bg-gradient-to-br from-slate-900 to-slate-950 border border-emerald-500/30 shadow-xl">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center text-center">
-              
-              <div className="p-6 rounded-2xl bg-slate-950/80 border border-emerald-500/40 space-y-3">
-                <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto text-2xl font-bold">
-                  👨‍🌾
-                </div>
-                <h3 className="text-lg font-bold text-white">Direct Farmer / FPO</h3>
-                <p className="text-xs text-slate-400">
-                  Sets MSP floor price, verifies crop freshness via AI, and retains 75–80% of final consumer realization.
-                </p>
-              </div>
-
-              <div className="p-6 rounded-2xl bg-slate-900/90 border border-teal-500/40 space-y-3 relative">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-teal-500 text-slate-950 font-black text-[10px] tracking-wider uppercase">
-                  Zero Intermediaries
-                </div>
-                <div className="w-14 h-14 rounded-2xl bg-teal-500/20 text-teal-400 flex items-center justify-center mx-auto text-2xl font-bold">
-                  🌱
-                </div>
-                <h3 className="text-lg font-bold text-white">AgroBridge Platform</h3>
-                <p className="text-xs text-slate-400">
-                  Real-time price comparison, smart driver assignment, and escrow payment protection for both parties.
-                </p>
-              </div>
-
-              <div className="p-6 rounded-2xl bg-slate-950/80 border border-cyan-500/40 space-y-3">
-                <div className="w-14 h-14 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center mx-auto text-2xl font-bold">
-                  🛒
-                </div>
-                <h3 className="text-lg font-bold text-white">Consumer & Bulk Buyer</h3>
-                <p className="text-xs text-slate-400">
-                  Enjoys 15–25% savings over supermarket prices, verified Grade A harvests, and doorstep GPS tracking.
-                </p>
-              </div>
-
-            </div>
-
-            <div className="mt-8 pt-6 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center text-xs">
-              <div className="text-slate-300 flex items-center justify-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>Direct Farmer Realization: 75–80%</span>
-              </div>
-              <div className="text-slate-300 flex items-center justify-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-teal-400" />
-                <span>Consumer Grocery Savings: 20–25%</span>
-              </div>
-              <div className="text-slate-300 flex items-center justify-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-amber-400" />
-                <span>Logistics Transit Spoilage: &lt; 4%</span>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 5. HOW IT WORKS (7 STEPS) */}
-      {/* ========================================================================= */}
-      <section id="how-it-works" className="py-20 bg-slate-900/30 border-y border-slate-800/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          
-          <div className="text-center max-w-3xl mx-auto space-y-4">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-teal-400 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/20">
-              End-to-End Workflow
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-white">
-              How AgroBridge Works
-            </h2>
-            <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              A 7-step transparent, verifiable lifecycle from farm harvest to consumer doorstep.
-            </p>
-          </div>
-
-          {/* 7 Visual Step Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4">
-            
-            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 relative group hover:border-emerald-500/50 transition-all">
-              <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 font-black text-xs flex items-center justify-center border border-emerald-500/30">
-                1
-              </div>
-              <div className="text-2xl">🌱</div>
-              <h3 className="text-xs font-bold text-white">Farmer Lists Produce</h3>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Farmer uploads photo, quantity, harvest date, and baseline price with AI quality grading.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 relative group hover:border-emerald-500/50 transition-all">
-              <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 font-black text-xs flex items-center justify-center border border-emerald-500/30">
-                2
-              </div>
-              <div className="text-2xl">🔍</div>
-              <h3 className="text-xs font-bold text-white">Consumer Discovers</h3>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Consumers search fresh hyperlocal harvests filtered by farm distance and verified quality.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 relative group hover:border-teal-500/50 transition-all">
-              <div className="w-8 h-8 rounded-full bg-teal-500/20 text-teal-400 font-black text-xs flex items-center justify-center border border-teal-500/30">
-                3
-              </div>
-              <div className="text-2xl">📊</div>
-              <h3 className="text-xs font-bold text-white">Price Transparency</h3>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Live side-by-side comparison reveals mandi benchmark, direct farm rate, and net savings.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 relative group hover:border-teal-500/50 transition-all">
-              <div className="w-8 h-8 rounded-full bg-teal-500/20 text-teal-400 font-black text-xs flex items-center justify-center border border-teal-500/30">
-                4
-              </div>
-              <div className="text-2xl">🔒</div>
-              <h3 className="text-xs font-bold text-white">Secure Order Flow</h3>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Payment enters simulated escrow vault, safeguarding funds until verified delivery.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 relative group hover:border-amber-500/50 transition-all">
-              <div className="w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 font-black text-xs flex items-center justify-center border border-amber-500/30">
-                5
-              </div>
-              <div className="text-2xl">🤖</div>
-              <h3 className="text-xs font-bold text-white">Smart Logistics</h3>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                AI dispatches the optimal nearby driver and generates a fuel-optimized waypoint sequence.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 relative group hover:border-amber-500/50 transition-all">
-              <div className="w-8 h-8 rounded-full bg-amber-500/20 text-amber-400 font-black text-xs flex items-center justify-center border border-amber-500/30">
-                6
-              </div>
-              <div className="text-2xl">🗺️</div>
-              <h3 className="text-xs font-bold text-white">Delivery Tracking</h3>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Live 3-point telemetry shows Farm pickup, transit vehicle movement, and consumer dropoff.
-              </p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 relative group hover:border-cyan-500/50 transition-all">
-              <div className="w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 font-black text-xs flex items-center justify-center border border-cyan-500/30">
-                7
-              </div>
-              <div className="text-2xl">✅</div>
-              <h3 className="text-xs font-bold text-white">Successful Delivery</h3>
-              <p className="text-[11px] text-slate-400 leading-relaxed">
-                Consumer verifies cargo with OTP; escrow auto-disburses instant payout to the farmer.
-              </p>
-            </div>
-
-          </div>
-
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 6. FEATURES SECTION (8 FEATURE CARDS) */}
-      {/* ========================================================================= */}
-      <section id="features" className="py-20 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          
-          <div className="text-center max-w-3xl mx-auto space-y-4">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-400 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-              Platform Features
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-white">
-              Core Platform Capabilities
-            </h2>
-            <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              Engineered with advanced algorithms, geospatial routing, and transparent e-commerce standards for Indian agriculture.
-            </p>
-          </div>
-
-          {/* 8 Feature Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-emerald-500/40 transition-all space-y-3">
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-                <Sprout className="w-6 h-6" />
-              </div>
-              <h3 className="text-base font-bold text-white">Direct Farmer Marketplace</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Eliminates speculative middlemen, letting individual farmers and FPOs sell directly to consumers and bulk institutions.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-teal-500/40 transition-all space-y-3">
-              <div className="w-12 h-12 rounded-xl bg-teal-500/10 text-teal-400 flex items-center justify-center">
-                <TrendingUp className="w-6 h-6" />
-              </div>
-              <h3 className="text-base font-bold text-white">AI-Assisted Demand Insights</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                14-day price and demand projections advising farmers when to harvest and sell to capture maximum market value.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-cyan-500/40 transition-all space-y-3">
-              <div className="w-12 h-12 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
-                <BarChart3 className="w-6 h-6" />
-              </div>
-              <h3 className="text-base font-bold text-white">Smart Price Comparison</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Instant side-by-side comparison of direct farm rates against local APMC mandis and retail grocery benchmarks.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-indigo-500/40 transition-all space-y-3">
-              <div className="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
-                <Cpu className="w-6 h-6" />
-              </div>
-              <h3 className="text-base font-bold text-white">Smart Driver Assignment</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Automated multi-criteria dispatch matching nearest rural drivers based on cargo capacity and route proximity.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-amber-500/40 transition-all space-y-3">
-              <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
-                <Navigation className="w-6 h-6" />
-              </div>
-              <h3 className="text-base font-bold text-white">Map-Based Logistics</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Integrated OpenStreetMap and Leaflet routing computing shortest road paths and cutting fuel waste by 33%.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-emerald-500/40 transition-all space-y-3">
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-                <MapPin className="w-6 h-6" />
-              </div>
-              <h3 className="text-base font-bold text-white">Nearby Products Discovery</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Geolocated sorting prioritizing crops harvested within your district, guaranteeing maximum peak freshness.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-teal-500/40 transition-all space-y-3">
-              <div className="w-12 h-12 rounded-xl bg-teal-500/10 text-teal-400 flex items-center justify-center">
-                <DollarSign className="w-6 h-6" />
-              </div>
-              <h3 className="text-base font-bold text-white">Transparent Pricing</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Itemized cost breakdown displaying exact farmer payout, logistics fee, and platform operational charges.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-cyan-500/40 transition-all space-y-3">
-              <div className="w-12 h-12 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
-                <Truck className="w-6 h-6" />
-              </div>
-              <h3 className="text-base font-bold text-white">Live Order Tracking</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Real-time 5-stage order status updates, vehicle speed telemetry, and dynamic ETA predictions for every delivery.
-              </p>
-            </div>
-
-          </div>
-
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 7. AI SECTION (AI-ASSISTED AGRICULTURE & LIVE CHART) */}
-      {/* ========================================================================= */}
-      <section id="ai-technology" className="py-20 bg-slate-900/50 border-y border-slate-800/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          
-          <div className="text-center max-w-3xl mx-auto space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-extrabold uppercase tracking-widest">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Algorithmic Intelligence</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-black text-white">
-              🤖 AI-Assisted Agriculture
-            </h2>
-            <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              Intelligent algorithmic decision support designed to advise—not replace—human judgment across the agricultural chain.
-            </p>
-            <div className="inline-block text-xs px-3 py-1 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
-              Advisory Decision Support • Grounded in Empirical Market Feed Data
-            </div>
-          </div>
-
-          {/* 4 AI Pillars */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            
-            <div className="p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold">
-                📈
-              </div>
-              <h3 className="text-sm font-bold text-white">Demand Forecasting</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Evaluates historical mandis inflow, local consumption velocity, and seasonal seasonality patterns.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-400 flex items-center justify-center font-bold">
-                💰
-              </div>
-              <h3 className="text-sm font-bold text-white">Price Recommendation</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Generates optimal price bands protecting farmer minimum safe price (MSP) while remaining competitive.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold">
-                🚚
-              </div>
-              <h3 className="text-sm font-bold text-white">Smart Driver Selection</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Multi-factor matching optimizing transit proximity, vehicle load rating, and driver availability score.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center font-bold">
-                ⚡
-              </div>
-              <h3 className="text-sm font-bold text-white">Smart Actionable Insights</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Automated waste risk alerts (e.g. unsold produce discounts) and optimal bulk buyer match recommendations.
-              </p>
-            </div>
-
-          </div>
-
-          {/* Interactive Live Chart Embed on Landing Page */}
-          <div className="pt-4">
-            <div className="text-center mb-6">
-              <h3 className="text-xl font-bold text-white">Live Future Market & Demand Graph</h3>
-              <p className="text-xs text-slate-400">Interactive preview of AI-Assisted trend modeling for both Farmers and Consumers.</p>
-            </div>
-            <div className="rounded-3xl bg-slate-950 border border-slate-800 p-4 sm:p-6 shadow-2xl">
-              <FutureInsightsChart initialRole="farmer" compact={false} showHeader={true} />
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 8. MAP & LOGISTICS SECTION */}
-      {/* ========================================================================= */}
-      <section id="logistics" className="py-20 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          
-          <div className="text-center max-w-3xl mx-auto space-y-4">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-amber-400 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20">
-              Geospatial Operations
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-white">
-              🗺️ Smart Logistics, Powered by Location
-            </h2>
-            <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              Dynamic rural-to-urban route orchestration reducing transport friction and transit delays.
-            </p>
-          </div>
-
-          {/* 4-Step Logistics Workflow */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            
-            <div className="p-5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
-              <div className="text-xs font-bold text-amber-400 uppercase tracking-wider">Step 1</div>
-              <h3 className="text-sm font-bold text-white">Farm Gate Pickup</h3>
-              <p className="text-xs text-slate-400">
-                Driver arrives at verified farm coordinates. Farmer confirms load via secure 4-digit pickup OTP.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
-              <div className="text-xs font-bold text-amber-400 uppercase tracking-wider">Step 2</div>
-              <h3 className="text-sm font-bold text-white">Smart Assignment</h3>
-              <p className="text-xs text-slate-400">
-                Automated matching factors in return hauls to eliminate deadhead mileage for rural fleet partners.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
-              <div className="text-xs font-bold text-amber-400 uppercase tracking-wider">Step 3</div>
-              <h3 className="text-sm font-bold text-white">Optimized Route</h3>
-              <p className="text-xs text-slate-400">
-                OpenStreetMap algorithm compresses transit distances (18 km ➔ 12 km), shaving 15+ minutes off deliveries.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-slate-900/70 border border-slate-800 space-y-2">
-              <div className="text-xs font-bold text-amber-400 uppercase tracking-wider">Step 4</div>
-              <h3 className="text-sm font-bold text-white">Doorstep Dropoff</h3>
-              <p className="text-xs text-slate-400">
-                Consumer verifies fresh produce condition and provides delivery OTP to complete escrow disbursement.
-              </p>
-            </div>
-
-          </div>
-
-          {/* Logistics Feature Checklist */}
-          <div className="p-6 rounded-2xl bg-slate-950 border border-slate-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
-            <div className="flex items-center gap-2 text-slate-300">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>3-Point Live Telemetry (Farm, Driver, Consumer)</span>
-            </div>
-            <div className="flex items-center gap-2 text-slate-300">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Turn-by-Turn Leaflet Route Waypoints</span>
-            </div>
-            <div className="flex items-center gap-2 text-slate-300">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Dual-Gate Cryptographic OTP Validation</span>
-            </div>
-            <div className="flex items-center gap-2 text-slate-300">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Real-Time Speed & Traffic ETA Calculations</span>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 9. ROLE SECTION (5 CARDS WITH CONTINUE BUTTONS) */}
+      {/* 3. ROLE-BASED ACCESS ("CHOOSE YOUR ROLE") */}
       {/* ========================================================================= */}
       <section id="roles" className="py-20 bg-slate-900/40 border-y border-slate-800/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           
-          <div className="text-center max-w-3xl mx-auto space-y-4">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
             <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-400 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-              Tailored Portals
+              Platform Authentication
             </span>
             <h2 className="text-3xl sm:text-4xl font-black text-white">
-              Designed for Every Agricultural Stakeholder
+              Choose Your Role
             </h2>
             <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              Specialized dashboards engineered for the distinct operational workflows of all 5 platform roles.
+              Select your role below to access your dedicated portal with tailored tools and real-time workflows.
             </p>
           </div>
 
@@ -987,7 +636,7 @@ export default function LandingPage({ onNavigate, currentUser }) {
             {roleLogins.map(role => (
               <div 
                 key={role.role}
-                className="p-6 rounded-3xl bg-slate-950 border border-slate-800 hover:border-slate-700 flex flex-col justify-between transition-all"
+                className={`p-6 rounded-3xl bg-slate-950 border border-slate-800 flex flex-col justify-between transition-all duration-300 ${role.glow}`}
               >
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
@@ -1000,7 +649,7 @@ export default function LandingPage({ onNavigate, currentUser }) {
                     <h3 className="text-lg font-bold text-white">{role.title}</h3>
                     <p className="text-xs text-slate-400 mt-1 leading-relaxed">{role.tagline}</p>
                   </div>
-                  <ul className="space-y-2 pt-2 border-t border-slate-800 text-[11px] text-slate-300">
+                  <ul className="space-y-2 pt-3 border-t border-slate-800/80 text-[11px] text-slate-300">
                     {role.features.map((feat, i) => (
                       <li key={i} className="flex items-start gap-1.5">
                         <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
@@ -1010,80 +659,39 @@ export default function LandingPage({ onNavigate, currentUser }) {
                   </ul>
                 </div>
 
-                <div className="pt-6">
+                <div className="pt-6 space-y-2">
                   <button
-                    onClick={() => onNavigate(role.route)}
+                    onClick={() => onNavigate(role.loginRoute)}
                     className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 flex items-center justify-center gap-1.5 ${role.btnBg}`}
                   >
-                    <span>Continue as {role.title}</span>
+                    <span>Login as {role.title}</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </button>
+
+                  {role.registerRoute ? (
+                    <button
+                      onClick={() => onNavigate(role.registerRoute)}
+                      className="w-full py-2 px-3 rounded-xl text-xs font-semibold text-slate-400 hover:text-white bg-slate-900/80 hover:bg-slate-800 border border-slate-800 transition-all text-center"
+                    >
+                      Register
+                    </button>
+                  ) : (
+                    <div className="py-2 text-[11px] text-slate-500 text-center font-medium">
+                      Admin Access Only
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
           </div>
 
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 10. LOGIN SECTION (CHOOSE YOUR ROLE) */}
-      {/* ========================================================================= */}
-      <section id="login" className="py-20 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          
-          <div className="text-center max-w-3xl mx-auto space-y-4">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-400 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-              Role Authentication
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-white">
-              Choose Your Role
-            </h2>
-            <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              Select your role below to access your dedicated dashboard and authenticated tools.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-            {roleLogins.map(role => (
-              <div
-                key={`login-${role.role}`}
-                className={`group relative rounded-3xl bg-slate-900/70 border border-slate-800 p-6 flex flex-col justify-between transition-all duration-300 ${role.glow}`}
-              >
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-4xl group-hover:scale-110 transition-transform">{role.emoji}</span>
-                    <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase ${role.accent} bg-slate-950 border border-slate-800`}>
-                      {role.badge}
-                    </span>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-black text-white">{role.title}</h3>
-                    <p className="text-xs text-slate-400 mt-1 leading-relaxed">{role.tagline}</p>
-                  </div>
-                </div>
-
-                <div className="pt-6">
-                  <button
-                    onClick={() => onNavigate(role.route)}
-                    className={`w-full py-3 px-4 rounded-xl text-xs font-black tracking-wider uppercase transition-all shadow-md active:scale-95 flex items-center justify-center gap-1.5 ${role.btnBg}`}
-                  >
-                    <span>{role.btnText}</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Quick Demo Mode Credentials Notice */}
-          <div className="p-4 rounded-2xl bg-slate-900/40 border border-slate-800/80 max-w-2xl mx-auto text-center space-y-1 text-xs text-slate-400">
-            <div className="font-bold text-slate-300 flex items-center justify-center gap-1.5">
-              <span>🔑</span> SIH Hackathon Evaluation Credentials
+          {/* Demonstration Credentials Note */}
+          <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80 max-w-2xl mx-auto text-center space-y-1 text-xs text-slate-400">
+            <div className="font-bold text-slate-200 flex items-center justify-center gap-1.5">
+              <span>🔑</span> SIH Hackathon Evaluation Demo Access
             </div>
             <p>
-              Pre-seeded accounts are active for all 5 roles with default demo password: <code className="text-emerald-400 bg-slate-950 px-2 py-0.5 rounded font-mono font-bold">Demo@123</code>
+              Pre-configured test accounts are enabled for all roles with default demo password: <code className="text-emerald-400 bg-slate-950 px-2 py-0.5 rounded font-mono font-bold">Demo@123</code>
             </p>
           </div>
 
@@ -1091,179 +699,155 @@ export default function LandingPage({ onNavigate, currentUser }) {
       </section>
 
       {/* ========================================================================= */}
-      {/* 11. WHY AGROBRIDGE IS DIFFERENT (8 DIMENSIONS) */}
+      {/* 4. KEY PLATFORM FEATURES */}
       {/* ========================================================================= */}
-      <section id="why-agrobridge" className="py-20 bg-slate-900/30 border-y border-slate-800/80">
+      <section id="features" className="py-20 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           
-          <div className="text-center max-w-3xl mx-auto space-y-4">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-teal-400 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/20">
-              Comparative Advantage
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-white">
-              Why AgroBridge Is Different
-            </h2>
-            <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              A comprehensive dimensional comparison against conventional channels and typical digital storefronts.
-            </p>
-          </div>
-
-          {/* Comparison Table */}
-          <div className="rounded-3xl bg-slate-950 border border-slate-800 overflow-hidden shadow-2xl">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs sm:text-sm">
-                <thead>
-                  <tr className="bg-slate-900/90 border-b border-slate-800 text-slate-400 font-bold uppercase tracking-wider text-[11px]">
-                    <th className="p-4 sm:p-5">Dimension</th>
-                    <th className="p-4 sm:p-5 text-rose-400">Traditional Mandi Supply Chain</th>
-                    <th className="p-4 sm:p-5 text-amber-400">Typical Online Marketplace</th>
-                    <th className="p-4 sm:p-5 text-emerald-400 bg-emerald-500/5">AgroBridge Platform</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/80 text-slate-300">
-                  
-                  <tr className="hover:bg-slate-900/30 transition-colors">
-                    <td className="p-4 sm:p-5 font-bold text-white">1. Direct Producer Access</td>
-                    <td className="p-4 sm:p-5 text-slate-400">No (Blocked by commission agents)</td>
-                    <td className="p-4 sm:p-5 text-slate-400">Rare (Third-party resellers & aggregators)</td>
-                    <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-emerald-500/5">✓ 100% Direct Farm-Gate Sourcing</td>
-                  </tr>
-
-                  <tr className="hover:bg-slate-900/30 transition-colors">
-                    <td className="p-4 sm:p-5 font-bold text-white">2. Price Transparency</td>
-                    <td className="p-4 sm:p-5 text-slate-400">Opaque (Undisclosed cuts & commissions)</td>
-                    <td className="p-4 sm:p-5 text-slate-400">Fixed Retail (Hidden platform margin)</td>
-                    <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-emerald-500/5">✓ Real-time Mandi vs Farm Side-by-Side</td>
-                  </tr>
-
-                  <tr className="hover:bg-slate-900/30 transition-colors">
-                    <td className="p-4 sm:p-5 font-bold text-white">3. Intermediary Layers</td>
-                    <td className="p-4 sm:p-5 text-rose-400">4 to 6 Speculative Middlemen</td>
-                    <td className="p-4 sm:p-5 text-amber-400">Warehouses, Dark Stores & Aggregators</td>
-                    <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-emerald-500/5">✓ Zero Middlemen (Point-to-Point)</td>
-                  </tr>
-
-                  <tr className="hover:bg-slate-900/30 transition-colors">
-                    <td className="p-4 sm:p-5 font-bold text-white">4. Quality Verification</td>
-                    <td className="p-4 sm:p-5 text-slate-400">Unstandardized manual inspection</td>
-                    <td className="p-4 sm:p-5 text-slate-400">Generic marketing claims</td>
-                    <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-emerald-500/5">✓ AgroBridge Assured 4-Pillar Certification</td>
-                  </tr>
-
-                  <tr className="hover:bg-slate-900/30 transition-colors">
-                    <td className="p-4 sm:p-5 font-bold text-white">5. Smart Route Optimization</td>
-                    <td className="p-4 sm:p-5 text-slate-400">Static, uncoordinated hauling</td>
-                    <td className="p-4 sm:p-5 text-slate-400">Standard hub-and-spoke delivery</td>
-                    <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-emerald-500/5">✓ AI Waypoints Saving 33% Mileage</td>
-                  </tr>
-
-                  <tr className="hover:bg-slate-900/30 transition-colors">
-                    <td className="p-4 sm:p-5 font-bold text-white">6. AI Price Intelligence</td>
-                    <td className="p-4 sm:p-5 text-slate-400">None (Farmers take distress prices)</td>
-                    <td className="p-4 sm:p-5 text-slate-400">Surge algorithms favoring platform</td>
-                    <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-emerald-500/5">✓ 14-Day Demand & MSP Forecasting</td>
-                  </tr>
-
-                  <tr className="hover:bg-slate-900/30 transition-colors">
-                    <td className="p-4 sm:p-5 font-bold text-white">7. Dual-OTP Escrow Security</td>
-                    <td className="p-4 sm:p-5 text-slate-400">Informal credit, delayed 30-60 days</td>
-                    <td className="p-4 sm:p-5 text-slate-400">Standard centralized merchant vault</td>
-                    <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-emerald-500/5">✓ Dual OTP (Pickup + Dropoff Payout)</td>
-                  </tr>
-
-                  <tr className="hover:bg-slate-900/30 transition-colors">
-                    <td className="p-4 sm:p-5 font-bold text-white">8. Stakeholder Inclusivity</td>
-                    <td className="p-4 sm:p-5 text-slate-400">Fragmented, distrustful interactions</td>
-                    <td className="p-4 sm:p-5 text-slate-400">Consumer-only centric design</td>
-                    <td className="p-4 sm:p-5 font-bold text-emerald-400 bg-emerald-500/5">✓ 5 Unified Portals (Farmer, Buyer, Driver, Admin)</td>
-                  </tr>
-
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 12. UNIQUE VALUE PROPOSITION (6 PILLARS) */}
-      {/* ========================================================================= */}
-      <section id="uvp" className="py-20 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          
-          <div className="text-center max-w-3xl mx-auto space-y-4">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
             <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-400 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-              Core Value Pillars
+              Core Platform Capabilities
             </span>
             <h2 className="text-3xl sm:text-4xl font-black text-white">
-              Our 6 Core Value Pillars
+              Built for High-Efficiency Agriculture
             </h2>
             <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              Foundational principles driving real economic and operational transformation for Indian agriculture.
+              Every feature is engineered to eliminate friction, guarantee fair pricing, and ensure seamless delivery from farm gate to consumer.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* 8 Concise Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {keyFeatures.map((feat, i) => {
+              const Icon = feat.icon;
+              return (
+                <div 
+                  key={i}
+                  className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 hover:bg-slate-900/90 transition-all space-y-3"
+                >
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${feat.bg} ${feat.accent}`}>
+                    <Icon className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-base font-bold text-white">{feat.title}</h3>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    {feat.tagline}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 5. AI-POWERED SMART OFFERS */}
+      {/* ========================================================================= */}
+      <section id="smart-offers" className="py-20 bg-slate-900/50 border-y border-slate-800/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/30 text-teal-400 text-xs font-extrabold uppercase tracking-widest">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>AI-Assisted Market Intelligence</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-black text-white">
+              AI-Powered Smart Offers
+            </h2>
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
+              Dynamic agricultural pricing and automated recommendations synchronized with real-time seasonal, meteorological, and festive demand cycles.
+            </p>
+          </div>
+
+          {/* Tab Selector */}
+          <div className="flex flex-wrap items-center justify-center gap-2 p-1.5 rounded-2xl bg-slate-950 border border-slate-800 max-w-3xl mx-auto">
+            {smartOfferItems.map(item => {
+              const TabIcon = item.icon;
+              const isActive = activeOfferTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveOfferTab(item.id)}
+                  className={`px-4 py-2 text-xs font-bold rounded-xl flex items-center gap-2 transition-all ${
+                    isActive 
+                      ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 shadow-md shadow-emerald-500/20' 
+                      : 'text-slate-400 hover:text-white hover:bg-slate-900'
+                  }`}
+                >
+                  <TabIcon className="w-3.5 h-3.5" />
+                  <span>{item.tabLabel}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Active Smart Offer Detailed Card */}
+          <div className="p-8 rounded-3xl bg-slate-950 border border-emerald-500/40 shadow-2xl relative overflow-hidden">
             
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold text-lg">
-                🤝
-              </div>
-              <h3 className="text-base font-bold text-white">1. Direct Connection</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Direct economic relationship between primary agricultural producers and terminal buyers, dismantling exploitative commission chains.
-              </p>
-            </div>
+            {/* Background Glow */}
+            <div className="absolute top-0 right-0 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-400 flex items-center justify-center font-bold text-lg">
-                🤖
-              </div>
-              <h3 className="text-base font-bold text-white">2. AI-Assisted Decision Support</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Data-driven crop valuation and demand forecasting empowering smallholders with commercial intelligence previously reserved for corporate agribusiness.
-              </p>
-            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
+              
+              <div className="lg:col-span-7 space-y-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 font-bold border border-emerald-500/30 flex items-center gap-1">
+                    <Sparkles className="w-3 h-3 text-emerald-400" />
+                    <span>{currentOffer.tag}</span>
+                  </span>
+                  <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-slate-900 text-slate-400 border border-slate-800 font-medium">
+                    {currentOffer.category}
+                  </span>
+                </div>
 
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center font-bold text-lg">
-                💰
-              </div>
-              <h3 className="text-base font-bold text-white">3. Price Transparency</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Clear visibility into mandi benchmark indices, ensuring fair farm realizations and genuine cost savings for households and businesses.
-              </p>
-            </div>
+                <h3 className="text-2xl sm:text-3xl font-black text-white leading-snug">
+                  {currentOffer.title}
+                </h3>
 
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-lg">
-                🚚
-              </div>
-              <h3 className="text-base font-bold text-white">4. Smart Logistics</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                On-demand rural fleet matching reducing food miles, turnaround delays, and perishable spoilage through algorithmic route compaction.
-              </p>
-            </div>
+                <p className="text-sm text-slate-300 leading-relaxed font-normal">
+                  {currentOffer.description}
+                </p>
 
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center font-bold text-lg">
-                📍
+                <div className="pt-2">
+                  <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                    Active Produce in this Offer:
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {currentOffer.sampleProducts.map((prod, i) => (
+                      <span key={i} className="text-xs px-3 py-1 rounded-xl bg-slate-900 text-slate-200 border border-slate-800">
+                        {prod}
+                      </span>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <h3 className="text-base font-bold text-white">5. Location-Aware Commerce</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Hyperlocal harvest discovery powered by OpenStreetMap coordinates, boosting regional food security and community economic resilience.
-              </p>
-            </div>
 
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center font-bold text-lg">
-                🛡️
+              <div className="lg:col-span-5 bg-slate-900/80 rounded-2xl border border-slate-800 p-6 space-y-5">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                  <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Algorithmic Signals</span>
+                  <span className="text-xs font-black text-teal-400 bg-teal-500/15 px-2.5 py-1 rounded-lg border border-teal-500/30">
+                    {currentOffer.highlight}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  {currentOffer.metrics.map((m, i) => (
+                    <div key={i} className="p-3 rounded-xl bg-slate-950 border border-slate-800">
+                      <div className="text-sm sm:text-base font-black text-white">{m.val}</div>
+                      <div className="text-[10px] text-slate-400 mt-1">{m.label}</div>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  onClick={() => onNavigate('/consumer/login')}
+                  className="w-full py-3 px-4 rounded-xl text-xs font-black text-slate-950 bg-gradient-to-r from-emerald-500 to-teal-400 hover:brightness-110 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  <span>Claim Offer in Marketplace</span>
+                </button>
               </div>
-              <h3 className="text-base font-bold text-white">6. End-to-End Ecosystem</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Complete lifecycle governance from seed to harvest listing, escrow payments, verified feedback, and administrative dispute resolution.
-              </p>
+
             </div>
 
           </div>
@@ -1272,196 +856,115 @@ export default function LandingPage({ onNavigate, currentUser }) {
       </section>
 
       {/* ========================================================================= */}
-      {/* 13. COMPARISON SECTION (AGROBRIDGE VS SOLUTIONS) */}
+      {/* 6. FARMER ACCESSIBILITY ("BUILT FOR EVERY FARMER") */}
       {/* ========================================================================= */}
-      <section id="comparison" className="py-20 bg-slate-900/40 border-y border-slate-800/80">
+      <section id="accessibility" className="py-20 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
           
-          <div className="text-center max-w-3xl mx-auto space-y-4">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-teal-400 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/20">
-              Market Benchmarking
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-white">
-              Comparative Solution Analysis
-            </h2>
-            <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              How AgroBridge stacks up against general solution categories in the agritech and retail ecosystem.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
-            {/* Category 1: Traditional APMC */}
-            <div className="p-6 rounded-3xl bg-slate-950 border border-rose-500/30 space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-rose-400">Legacy Channel</span>
-                <span className="text-xs text-slate-400">APMC Mandi</span>
-              </div>
-              <h3 className="text-lg font-bold text-white">Conventional APMC Mandi System</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Physical wholesale auction markets dependent on licensed commission agents (arhtiyas), physical weighments, and multiple transport steps.
-              </p>
-              <div className="space-y-2 pt-2 border-t border-slate-800 text-xs">
-                <div className="flex justify-between text-slate-300">
-                  <span>Farmer Realization:</span>
-                  <span className="font-bold text-rose-400">30% – 35%</span>
-                </div>
-                <div className="flex justify-between text-slate-300">
-                  <span>Middlemen Tiers:</span>
-                  <span className="font-bold text-rose-400">4 – 6 Layers</span>
-                </div>
-                <div className="flex justify-between text-slate-300">
-                  <span>Transit Time:</span>
-                  <span className="font-bold text-slate-400">36 – 48 Hours</span>
-                </div>
-                <div className="flex justify-between text-slate-300">
-                  <span>Price Transparency:</span>
-                  <span className="font-bold text-rose-400">Opaque</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Category 2: Generic E-Commerce */}
-            <div className="p-6 rounded-3xl bg-slate-950 border border-amber-500/30 space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-amber-400">Digital Retail</span>
-                <span className="text-xs text-slate-400">Online Grocery</span>
-              </div>
-              <h3 className="text-lg font-bold text-white">Typical Online Grocery Platforms</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Centralized dark-store aggregators that purchase from wholesale consolidators and resell to consumers at marked-up prices.
-              </p>
-              <div className="space-y-2 pt-2 border-t border-slate-800 text-xs">
-                <div className="flex justify-between text-slate-300">
-                  <span>Farmer Realization:</span>
-                  <span className="font-bold text-amber-400">40% – 45%</span>
-                </div>
-                <div className="flex justify-between text-slate-300">
-                  <span>Middlemen Tiers:</span>
-                  <span className="font-bold text-amber-400">Aggregators & Hubs</span>
-                </div>
-                <div className="flex justify-between text-slate-300">
-                  <span>Transit Time:</span>
-                  <span className="font-bold text-slate-400">24 – 36 Hours</span>
-                </div>
-                <div className="flex justify-between text-slate-300">
-                  <span>Price Transparency:</span>
-                  <span className="font-bold text-amber-400">Moderate</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Category 3: AgroBridge */}
-            <div className="p-6 rounded-3xl bg-slate-950 border border-emerald-500/50 space-y-4 relative shadow-xl shadow-emerald-500/10">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">SIH Solution</span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 font-bold border border-emerald-500/30">AgroBridge</span>
-              </div>
-              <h3 className="text-lg font-bold text-white">AgroBridge Smart AgriTech</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Direct peer-to-peer agricultural marketplace integrating AI price intelligence, verified crop quality, and 3-point GPS delivery routing.
-              </p>
-              <div className="space-y-2 pt-2 border-t border-slate-800 text-xs">
-                <div className="flex justify-between text-slate-300">
-                  <span>Farmer Realization:</span>
-                  <span className="font-bold text-emerald-400">75% – 80%</span>
-                </div>
-                <div className="flex justify-between text-slate-300">
-                  <span>Middlemen Tiers:</span>
-                  <span className="font-bold text-emerald-400">Zero (Direct)</span>
-                </div>
-                <div className="flex justify-between text-slate-300">
-                  <span>Transit Time:</span>
-                  <span className="font-bold text-emerald-400">4 – 8 Hours (Same Day)</span>
-                </div>
-                <div className="flex justify-between text-slate-300">
-                  <span>Price Transparency:</span>
-                  <span className="font-bold text-emerald-400">100% Itemized</span>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 14. PROJECT ARCHITECTURE FLOWCHART */}
-      {/* ========================================================================= */}
-      <section id="architecture" className="py-20 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          
-          <div className="text-center max-w-3xl mx-auto space-y-4">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
             <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-400 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-              System Engineering
+              Inclusive Rural Access
             </span>
             <h2 className="text-3xl sm:text-4xl font-black text-white">
-              Platform System Architecture
+              Built for Every Farmer
             </h2>
             <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              High-performance, modular full-stack engineering powering real-time agricultural operations.
+              Designed to ensure 100% digital inclusion whether the farmer possesses a modern 5G smartphone or a basic 2G feature phone.
             </p>
           </div>
 
-          {/* Architecture Flowchart Diagram */}
-          <div className="p-8 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center text-center text-xs">
-              
-              <div className="p-4 rounded-2xl bg-slate-950 border border-emerald-500/30 space-y-2">
-                <div className="text-xl">💻</div>
-                <div className="font-bold text-white">Frontend Client</div>
-                <div className="text-[11px] text-emerald-400">React 18 + Tailwind</div>
-                <p className="text-[10px] text-slate-400">Responsive SPAs for all 5 roles, Recharts & Leaflet</p>
-              </div>
-
-              <div className="text-slate-500 font-mono text-sm hidden md:block">
-                ➔ REST / JSON ➔
-              </div>
-
-              <div className="p-4 rounded-2xl bg-slate-950 border border-teal-500/30 space-y-2">
-                <div className="text-xl">⚙️</div>
-                <div className="font-bold text-white">Backend Server</div>
-                <div className="text-[11px] text-teal-400">Node.js + Express 4</div>
-                <p className="text-[10px] text-slate-400">JWT Authentication, RBAC, Escrow state engine</p>
-              </div>
-
-              <div className="text-slate-500 font-mono text-sm hidden md:block">
-                ➔ Queries & Feeds ➔
-              </div>
-
-              <div className="p-4 rounded-2xl bg-slate-950 border border-cyan-500/30 space-y-2">
-                <div className="text-xl">🗄️</div>
-                <div className="font-bold text-white">Persistence Store</div>
-                <div className="text-[11px] text-cyan-400">MongoDB / Mongoose</div>
-                <p className="text-[10px] text-slate-400">Role models, listings, orders, feedback & telemetry</p>
-              </div>
-
-            </div>
-
-            <div className="pt-6 border-t border-slate-800 grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
-              
-              <div className="p-4 rounded-2xl bg-slate-950 border border-amber-500/30 space-y-2">
-                <div className="flex items-center gap-2 font-bold text-amber-400">
-                  <Cpu className="w-4 h-4" />
-                  <span>AI & Machine Learning Engine (Python / FastAPI)</span>
+            {/* 1. Smartphone Access */}
+            <div className="p-8 rounded-3xl bg-slate-900/60 border border-emerald-500/30 hover:border-emerald-500/60 transition-all space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="w-14 h-14 rounded-2xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-2xl">
+                  📱
                 </div>
-                <p className="text-slate-300 leading-relaxed">
-                  Time-series forecasting for 14-day price projections, MCDA deal matching algorithm, and computer vision quality inspection pipelines.
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                  Web + WhatsApp
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-bold text-white">Smartphone Access</h3>
+                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                  Engineered for progressive farmers utilizing 4G/5G mobile connectivity with intuitive visual interfaces.
                 </p>
               </div>
 
-              <div className="p-4 rounded-2xl bg-slate-950 border border-indigo-500/30 space-y-2">
-                <div className="flex items-center gap-2 font-bold text-indigo-400">
-                  <Navigation className="w-4 h-4" />
-                  <span>Geospatial Mapping & Routing Engine (OSRM / Leaflet)</span>
+              <ul className="space-y-2.5 text-xs text-slate-300">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>Responsive web dashboard with real-time earnings analytics</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>WhatsApp Assistant for automated order alerts and chat queries</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>AI camera crop freshness grading & certificate generation</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>Instant digital wallet payouts protected by escrow</span>
+                </li>
+              </ul>
+
+              <button
+                onClick={() => onNavigate('/farmer/login')}
+                className="w-full py-3 px-4 rounded-xl text-xs font-bold text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition-all flex items-center justify-center gap-2"
+              >
+                <span>Launch Farmer Portal & WhatsApp</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* 2. Basic Phone Access */}
+            <div className="p-8 rounded-3xl bg-slate-900/60 border border-teal-500/30 hover:border-teal-500/60 transition-all space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="w-14 h-14 rounded-2xl bg-teal-500/15 text-teal-400 flex items-center justify-center text-2xl">
+                  ☎️
                 </div>
-                <p className="text-slate-300 leading-relaxed">
-                  OpenStreetMap road network ingestion, waypoint path compaction, proximity driver dispatch, and 3-point live delivery telemetry.
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-teal-500/15 text-teal-300 border border-teal-500/30">
+                  Missed Call / IVR
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-xl font-bold text-white">Basic Phone Access</h3>
+                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                  Tailored for marginal smallholders in low-connectivity areas using basic keypad feature phones.
                 </p>
               </div>
 
+              <ul className="space-y-2.5 text-xs text-slate-300">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-teal-400 shrink-0" />
+                  <span>Toll-free <strong>1800-AGRO-BRIDGE</strong> missed call automatic callback</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-teal-400 shrink-0" />
+                  <span>Bilingual interactive voice response (Hindi & English)</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-teal-400 shrink-0" />
+                  <span>Audio readout of today's mandi benchmark rates & active orders</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-teal-400 shrink-0" />
+                  <span>Zero internet or application installation required</span>
+                </li>
+              </ul>
+
+              <button
+                onClick={() => onNavigate('/farmer/login')}
+                className="w-full py-3 px-4 rounded-xl text-xs font-bold text-teal-300 bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/30 transition-all flex items-center justify-center gap-2"
+              >
+                <span>Simulate IVR Telephony Call</span>
+                <ChevronRight className="w-4 h-4" />
+              </button>
             </div>
 
           </div>
@@ -1470,285 +973,7 @@ export default function LandingPage({ onNavigate, currentUser }) {
       </section>
 
       {/* ========================================================================= */}
-      {/* 15. TECHNOLOGY STACK SECTION */}
-      {/* ========================================================================= */}
-      <section id="technology" className="py-20 bg-slate-900/30 border-y border-slate-800/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          
-          <div className="text-center max-w-3xl mx-auto space-y-4">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-cyan-400 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20">
-              Stack Specifications
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-white">
-              Technology Stack
-            </h2>
-            <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              Engineered with proven, modern, and open-source frameworks for maximum reliability and scalability.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            
-            <div className="p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
-              <div className="flex items-center gap-2 font-bold text-emerald-400 text-sm">
-                <Layers className="w-4 h-4" />
-                <span>Frontend Client</span>
-              </div>
-              <ul className="text-xs text-slate-300 space-y-1.5">
-                <li>• <strong>React 18.3</strong> with Vite 5.3 bundler</li>
-                <li>• <strong>Tailwind CSS 3.4</strong> modern design system</li>
-                <li>• <strong>Lucide React</strong> accessible icons</li>
-                <li>• <strong>Recharts 3.10</strong> interactive trend analytics</li>
-              </ul>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
-              <div className="flex items-center gap-2 font-bold text-teal-400 text-sm">
-                <Cpu className="w-4 h-4" />
-                <span>Backend & Security</span>
-              </div>
-              <ul className="text-xs text-slate-300 space-y-1.5">
-                <li>• <strong>Node.js & Express 4.19</strong> REST API</li>
-                <li>• <strong>JSON Web Tokens (JWT)</strong> authentication</li>
-                <li>• <strong>Bcrypt.js</strong> cryptographic password hashing</li>
-                <li>• <strong>Role-Based Access Control (RBAC)</strong> guards</li>
-              </ul>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
-              <div className="flex items-center gap-2 font-bold text-cyan-400 text-sm">
-                <BarChart3 className="w-4 h-4" />
-                <span>Data & Persistence</span>
-              </div>
-              <ul className="text-xs text-slate-300 space-y-1.5">
-                <li>• <strong>MongoDB & Mongoose 8.5</strong> document store</li>
-                <li>• In-memory high-speed seed fallback for demo</li>
-                <li>• ACID transaction simulation for escrow payouts</li>
-                <li>• Fast indexing on coordinates & product tags</li>
-              </ul>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
-              <div className="flex items-center gap-2 font-bold text-amber-400 text-sm">
-                <Sparkles className="w-4 h-4" />
-                <span>AI & Analytics</span>
-              </div>
-              <ul className="text-xs text-slate-300 space-y-1.5">
-                <li>• <strong>Python & FastAPI</strong> microservice layer</li>
-                <li>• <strong>Scikit-Learn</strong> time-series prediction models</li>
-                <li>• <strong>MCDA Algorithm</strong> 9-factor supplier deal matching</li>
-                <li>• Computer vision freshness & quality scoring</li>
-              </ul>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
-              <div className="flex items-center gap-2 font-bold text-indigo-400 text-sm">
-                <MapPin className="w-4 h-4" />
-                <span>Geospatial Mapping</span>
-              </div>
-              <ul className="text-xs text-slate-300 space-y-1.5">
-                <li>• <strong>Leaflet 1.9</strong> interactive map canvas</li>
-                <li>• <strong>OpenStreetMap</strong> global tile layers</li>
-                <li>• <strong>Nominatim</strong> reverse-geocoding API</li>
-                <li>• OSRM-compatible turn-by-turn road geometry</li>
-              </ul>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-950 border border-slate-800 space-y-3">
-              <div className="flex items-center gap-2 font-bold text-purple-400 text-sm">
-                <Shield className="w-4 h-4" />
-                <span>Ecosystem Governance</span>
-              </div>
-              <ul className="text-xs text-slate-300 space-y-1.5">
-                <li>• Dual-gate OTP cargo handover verification</li>
-                <li>• Verified purchaser review & feedback limits</li>
-                <li>• Admin sanction toggles (Warn, Unlist, Suspend)</li>
-                <li>• 3-stage consumer complaint resolution workflow</li>
-              </ul>
-            </div>
-
-          </div>
-
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 16. IMPACT SECTION (6 IMPACT DIMENSIONS) */}
-      {/* ========================================================================= */}
-      <section id="impact" className="py-20 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          
-          <div className="text-center max-w-3xl mx-auto space-y-4">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-emerald-400 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-              Socio-Economic Value
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-white">
-              Tangible Agricultural & Social Impact
-            </h2>
-            <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              Measurable benefits delivered across the agricultural value chain.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-2">
-              <div className="text-xl">📱</div>
-              <h3 className="text-sm font-bold text-white">1. Digital Access for Smallholders</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Connects marginal farmers with direct digital markets, eliminating their total dependency on local cartel brokers.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-2">
-              <div className="text-xl">⚖️</div>
-              <h3 className="text-sm font-bold text-white">2. Transparent Pricing</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Ensures fair remuneration aligned with real market values and prevents arbitrary commission deductions.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-2">
-              <div className="text-xl">🧠</div>
-              <h3 className="text-sm font-bold text-white">3. Data-Assisted Farm Decisions</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Enables informed harvesting, reducing distress dumping and optimizing crop revenue through forecast models.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-2">
-              <div className="text-xl">🚚</div>
-              <h3 className="text-sm font-bold text-white">4. Smarter Rural Logistics</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Reduces food wastage and transportation costs through consolidated point-to-point route optimization.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-2">
-              <div className="text-xl">🥗</div>
-              <h3 className="text-sm font-bold text-white">5. Easier Fresh Discovery</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Provides consumers and bulk buyers with high-quality, traceable agricultural produce at competitive prices.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-2">
-              <div className="text-xl">🌐</div>
-              <h3 className="text-sm font-bold text-white">6. Location-Based Commerce</h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Shortens supply chains and promotes local agricultural economies through geospatial demand-supply matching.
-              </p>
-            </div>
-
-          </div>
-
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 17. REFERENCES & DATA SOURCES SECTION */}
-      {/* ========================================================================= */}
-      <section id="references" className="py-20 bg-slate-900/40 border-y border-slate-800/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          
-          <div className="text-center max-w-3xl mx-auto space-y-4">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-teal-400 px-3 py-1 rounded-full bg-teal-500/10 border border-teal-500/20">
-              Foundations & Research
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-white">
-              Academic References & Data Standards
-            </h2>
-            <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              AgroBridge is conceptualized and built adhering to official guidelines, research literature, and open geospatial standards.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-xs">
-            
-            <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
-              <div className="font-bold text-white flex items-center gap-1.5">
-                <FileText className="w-4 h-4 text-emerald-400" />
-                <span>Smart India Hackathon (SIH26033)</span>
-              </div>
-              <p className="text-slate-400 leading-relaxed">
-                Problem Statement SIH26033: AI-powered direct agricultural marketplace bridging farmers, consumers, and bulk buyers with smart logistics.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
-              <div className="font-bold text-white flex items-center gap-1.5">
-                <Globe className="w-4 h-4 text-teal-400" />
-                <span>Agmarknet & e-NAM (Govt of India)</span>
-              </div>
-              <p className="text-slate-400 leading-relaxed">
-                National agricultural market price standards and commodity classification references. <em>(Future direct API integration planned)</em>.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
-              <div className="font-bold text-white flex items-center gap-1.5">
-                <Sprout className="w-4 h-4 text-cyan-400" />
-                <span>ICAR Agricultural Research</span>
-              </div>
-              <p className="text-slate-400 leading-relaxed">
-                Post-harvest loss mitigation protocols and shelf-life metrics for perishable horticulture crops across Central Indian districts.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
-              <div className="font-bold text-white flex items-center gap-1.5">
-                <MapPin className="w-4 h-4 text-amber-400" />
-                <span>OpenStreetMap & Leaflet GIS</span>
-              </div>
-              <p className="text-slate-400 leading-relaxed">
-                Open-access geospatial road cartography and Nominatim API for geocoding coordinates across Madhya Pradesh clusters.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
-              <div className="font-bold text-white flex items-center gap-1.5">
-                <Cpu className="w-4 h-4 text-indigo-400" />
-                <span>Python & FastAPI ML Ecosystem</span>
-              </div>
-              <p className="text-slate-400 leading-relaxed">
-                Statistical regression and Multi-Criteria Decision Analysis (MCDA) mathematical foundations for multi-variable supplier scoring.
-              </p>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2">
-              <div className="font-bold text-white flex items-center gap-1.5">
-                <Layers className="w-4 h-4 text-purple-400" />
-                <span>W3C & React Architecture Standards</span>
-              </div>
-              <p className="text-slate-400 leading-relaxed">
-                Component modularity, Web Content Accessibility Guidelines (WCAG), and responsive layout standards for high rural usability.
-              </p>
-            </div>
-
-          </div>
-
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 18. PROTOTYPE & EVALUATION DISCLAIMER SECTION */}
-      {/* ========================================================================= */}
-      <section id="disclaimer" className="py-12 bg-slate-950 border-b border-slate-900">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="p-6 rounded-3xl bg-slate-900/60 border border-slate-800 text-center space-y-3">
-            <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-amber-400">
-              <AlertTriangle className="w-4 h-4" />
-              <span>Prototype & Demonstration Notice</span>
-            </div>
-            <p className="text-xs text-slate-400 max-w-3xl mx-auto leading-relaxed">
-              AgroBridge is an original software demonstration prototype engineered for evaluation under the Smart India Hackathon. All simulated datasets, price indices, and algorithmic recommendations are provided for educational and evaluation purposes. Future integrations with national agricultural databases (e.g., e-NAM, Agmarknet) and third-party logistics APIs are planned for production deployment.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 19. CALL TO ACTION SECTION */}
+      {/* 7. FINAL CTA */}
       {/* ========================================================================= */}
       <section id="cta" className="py-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/10 via-transparent to-transparent pointer-events-none -z-10" />
@@ -1761,7 +986,7 @@ export default function LandingPage({ onNavigate, currentUser }) {
 
           <div className="space-y-4">
             <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-              Ready to Experience a Smarter Agricultural Marketplace?
+              Build a Smarter Farm-to-Consumer Journey
             </h2>
             <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
               Join progressive farmers, conscious consumers, and commercial buyers transforming the future of Indian agriculture.
@@ -1770,24 +995,18 @@ export default function LandingPage({ onNavigate, currentUser }) {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
             <button
-              onClick={() => onNavigate('/consumer/login')}
+              onClick={() => scrollToSection('roles')}
               className="w-full sm:w-auto px-8 py-4 text-sm font-black text-slate-950 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 hover:brightness-110 rounded-2xl shadow-xl shadow-emerald-500/25 active:scale-95 transition-all flex items-center justify-center gap-2"
             >
-              <span>Explore Consumer Marketplace</span>
-              <ShoppingCart className="w-4 h-4" />
+              <span>Start with AgroBridge</span>
+              <ChevronRight className="w-4 h-4" />
             </button>
             <button
-              onClick={() => onNavigate('/farmer/login')}
+              onClick={() => onNavigate('/consumer/login')}
               className="w-full sm:w-auto px-8 py-4 text-sm font-bold text-slate-200 hover:text-white bg-slate-900 hover:bg-slate-800 border border-slate-700/80 rounded-2xl shadow-sm transition-all flex items-center justify-center gap-2"
             >
-              <span>Register as a Farmer</span>
-              <ArrowRight className="w-4 h-4 text-emerald-400" />
-            </button>
-            <button
-              onClick={() => scrollToSection('login')}
-              className="w-full sm:w-auto px-8 py-4 text-sm font-bold text-slate-300 hover:text-white bg-slate-950 hover:bg-slate-900 border border-slate-800 rounded-2xl shadow-sm transition-all"
-            >
-              View All 5 Portals
+              <ShoppingCart className="w-4 h-4 text-emerald-400" />
+              <span>Explore Marketplace</span>
             </button>
           </div>
 
@@ -1795,15 +1014,15 @@ export default function LandingPage({ onNavigate, currentUser }) {
       </section>
 
       {/* ========================================================================= */}
-      {/* 20. FOOTER */}
+      {/* 8. FOOTER */}
       {/* ========================================================================= */}
       <footer className="border-t border-slate-900 bg-slate-950 py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto space-y-12">
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             
-            {/* Brand Column */}
-            <div className="lg:col-span-2 space-y-4">
+            {/* AgroBridge Brand Info */}
+            <div className="space-y-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20">
                   <Sprout className="w-5 h-5 text-slate-950" />
@@ -1813,48 +1032,46 @@ export default function LandingPage({ onNavigate, currentUser }) {
                   <p className="text-xs text-emerald-400 font-medium">Smart India Hackathon Prototype (SIH26033)</p>
                 </div>
               </div>
-              <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
-                Connecting Farmers. Consumers. Technology. An AI-powered direct agricultural marketplace streamlining supply chains, ensuring fair farm realizations, and reducing post-harvest losses.
+              <p className="text-xs text-slate-400 leading-relaxed">
+                An AI-assisted agricultural marketplace connecting farmers, consumers, bulk buyers and logistics in one integrated ecosystem.
               </p>
               <div className="text-xs text-slate-500">
-                Built with precision for Smart India Hackathon Problem Statement SIH26033.
+                Empowering producers with transparent pricing & zero middleman exploitation.
               </div>
             </div>
 
-            {/* Platform Links */}
+            {/* Platform Quick Links */}
             <div className="space-y-3 text-xs">
-              <h4 className="font-bold text-white uppercase tracking-wider text-[11px]">Platform</h4>
+              <h4 className="font-bold text-white uppercase tracking-wider text-[11px]">AgroBridge</h4>
               <ul className="space-y-2 text-slate-400">
                 <li><button onClick={() => scrollToSection('hero')} className="hover:text-emerald-400 transition-colors">Home</button></li>
-                <li><button onClick={() => scrollToSection('problem')} className="hover:text-emerald-400 transition-colors">About Us</button></li>
-                <li><button onClick={() => scrollToSection('how-it-works')} className="hover:text-emerald-400 transition-colors">How It Works</button></li>
-                <li><button onClick={() => scrollToSection('features')} className="hover:text-emerald-400 transition-colors">Features</button></li>
-                <li><button onClick={() => scrollToSection('why-agrobridge')} className="hover:text-emerald-400 transition-colors">Why AgroBridge</button></li>
-                <li><button onClick={() => scrollToSection('comparison')} className="hover:text-emerald-400 transition-colors">Comparison</button></li>
+                <li><button onClick={() => scrollToSection('features')} className="hover:text-emerald-400 transition-colors">About Us</button></li>
+                <li><button onClick={() => scrollToSection('smart-offers')} className="hover:text-emerald-400 transition-colors">Smart Offers</button></li>
+                <li><button onClick={() => scrollToSection('accessibility')} className="hover:text-emerald-400 transition-colors">Farmer Accessibility</button></li>
               </ul>
             </div>
 
-            {/* 5 Portals */}
+            {/* Marketplace & Portals */}
             <div className="space-y-3 text-xs">
-              <h4 className="font-bold text-white uppercase tracking-wider text-[11px]">5 Dedicated Portals</h4>
+              <h4 className="font-bold text-white uppercase tracking-wider text-[11px]">Marketplace & Roles</h4>
               <ul className="space-y-2 text-slate-400">
-                <li><button onClick={() => onNavigate('/farmer/login')} className="hover:text-emerald-400 transition-colors flex items-center gap-1.5"><span>👨‍🌾</span> Farmer Portal</button></li>
-                <li><button onClick={() => onNavigate('/consumer/login')} className="hover:text-teal-400 transition-colors flex items-center gap-1.5"><span>🛒</span> Consumer Market</button></li>
+                <li><button onClick={() => onNavigate('/consumer/login')} className="hover:text-teal-400 transition-colors flex items-center gap-1.5"><span>🛒</span> Marketplace</button></li>
+                <li><button onClick={() => onNavigate('/farmer/login')} className="hover:text-emerald-400 transition-colors flex items-center gap-1.5"><span>🌾</span> Farmer Portal</button></li>
                 <li><button onClick={() => onNavigate('/bulk-buyer/login')} className="hover:text-indigo-400 transition-colors flex items-center gap-1.5"><span>🏢</span> Bulk Buyer Desk</button></li>
                 <li><button onClick={() => onNavigate('/driver/login')} className="hover:text-amber-400 transition-colors flex items-center gap-1.5"><span>🚚</span> Driver Fleet</button></li>
-                <li><button onClick={() => onNavigate('/admin/login')} className="hover:text-violet-400 transition-colors flex items-center gap-1.5"><span>👨‍💼</span> Admin APMC</button></li>
+                <li><button onClick={() => onNavigate('/admin/login')} className="hover:text-violet-400 transition-colors flex items-center gap-1.5"><span>🛡️</span> Admin Governance</button></li>
               </ul>
             </div>
 
-            {/* Technology & Standards */}
+            {/* Compliance & Legal */}
             <div className="space-y-3 text-xs">
-              <h4 className="font-bold text-white uppercase tracking-wider text-[11px]">Technology</h4>
+              <h4 className="font-bold text-white uppercase tracking-wider text-[11px]">Legal & Support</h4>
               <ul className="space-y-2 text-slate-400">
-                <li><button onClick={() => scrollToSection('architecture')} className="hover:text-emerald-400 transition-colors">System Architecture</button></li>
-                <li><button onClick={() => scrollToSection('ai-technology')} className="hover:text-emerald-400 transition-colors">AI Forecasting</button></li>
-                <li><button onClick={() => scrollToSection('logistics')} className="hover:text-emerald-400 transition-colors">OpenStreetMap GIS</button></li>
-                <li><button onClick={() => scrollToSection('references')} className="hover:text-emerald-400 transition-colors">Data Standards</button></li>
-                <li><button onClick={() => scrollToSection('disclaimer')} className="hover:text-emerald-400 transition-colors">Prototype Notice</button></li>
+                <li><button onClick={() => onNavigate('/login')} className="hover:text-emerald-400 transition-colors">Login / Authentication</button></li>
+                <li><a href="mailto:support@agrobridge.in" className="hover:text-emerald-400 transition-colors">Contact Support</a></li>
+                <li><span className="text-slate-500">Privacy Policy</span></li>
+                <li><span className="text-slate-500">Terms of Service</span></li>
+                <li><span className="text-slate-500">Escrow Guarantee</span></li>
               </ul>
             </div>
 
@@ -1862,7 +1079,7 @@ export default function LandingPage({ onNavigate, currentUser }) {
 
           <div className="pt-8 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 text-center">
             <div>© 2026 AgroBridge Platform. All rights reserved.</div>
-            <div className="text-emerald-400 font-medium">Connecting Farmers. Consumers. Technology.</div>
+            <div className="text-emerald-400 font-medium">Connecting Farmers Directly to Consumers</div>
             <div>Problem Statement SIH26033 Prototype</div>
           </div>
 

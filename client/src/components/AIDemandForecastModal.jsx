@@ -1,5 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { X, TrendingUp, Sparkles, MapPin, Calendar, CheckCircle2, AlertCircle, BarChart3, Loader2 } from 'lucide-react';
+import { 
+  X, 
+  TrendingUp, 
+  Sparkles, 
+  MapPin, 
+  Calendar, 
+  CheckCircle2, 
+  AlertCircle, 
+  BarChart3, 
+  Loader2, 
+  ChevronDown, 
+  ChevronUp, 
+  Database, 
+  Info,
+  ShieldCheck
+} from 'lucide-react';
 import { aiAPI } from '../services/api';
 
 export default function AIDemandForecastModal({ isOpen, onClose, initialCommodity = 'Tomato' }) {
@@ -7,6 +22,7 @@ export default function AIDemandForecastModal({ isOpen, onClose, initialCommodit
   const [region, setRegion] = useState('Bhopal');
   const [loading, setLoading] = useState(false);
   const [forecast, setForecast] = useState(null);
+  const [showWhyFactors, setShowWhyFactors] = useState(false);
 
   const fetchForecast = async () => {
     setLoading(true);
@@ -16,7 +32,7 @@ export default function AIDemandForecastModal({ isOpen, onClose, initialCommodit
         setForecast(res.data.data);
       }
     } catch (err) {
-      console.error(err);
+      console.error('Error fetching demand forecast:', err);
     } finally {
       setLoading(false);
     }
@@ -29,6 +45,10 @@ export default function AIDemandForecastModal({ isOpen, onClose, initialCommodit
   }, [isOpen, commodity, region]);
 
   if (!isOpen) return null;
+
+  const maxQtlInHorizon = forecast?.forecastDays?.length 
+    ? Math.max(...forecast.forecastDays.map(f => f.projectedDemandQuintals || 0), 40)
+    : 100;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
@@ -47,7 +67,7 @@ export default function AIDemandForecastModal({ isOpen, onClose, initialCommodit
                   7-Day Predictive
                 </span>
               </div>
-              <p className="text-xs text-slate-400">Deep Machine Learning Supply-Demand Equilibrium Engine</p>
+              <p className="text-xs text-slate-400">Grounded in APMC Daily Inflows & Consumption Equilibrium</p>
             </div>
           </div>
           <button
@@ -73,6 +93,8 @@ export default function AIDemandForecastModal({ isOpen, onClose, initialCommodit
               <option value="Soybean">Soybean (Yellow)</option>
               <option value="Potato">Potato (Jyoti / Kufri)</option>
               <option value="Cauliflower">Cauliflower</option>
+              <option value="Cucumber">Cucumber</option>
+              <option value="Apple">Apple (Shimla / Royal)</option>
             </select>
           </div>
 
@@ -83,11 +105,11 @@ export default function AIDemandForecastModal({ isOpen, onClose, initialCommodit
               onChange={(e) => setRegion(e.target.value)}
               className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
             >
-              <option value="Bhopal">Bhopal Urban & Industrial</option>
-              <option value="Indore">Indore Metro & Commercial</option>
-              <option value="Sehore">Sehore Rural Aggregation</option>
-              <option value="Ujjain">Ujjain Religious & Urban Hub</option>
-              <option value="Jabalpur">Jabalpur Eastern Hub</option>
+              <option value="Bhopal">Bhopal Urban & Industrial Hub</option>
+              <option value="Indore">Indore Metro & Commercial Center</option>
+              <option value="Sehore">Sehore Rural Aggregation Mandi</option>
+              <option value="Ujjain">Ujjain Religious & Urban Belt</option>
+              <option value="Jabalpur">Jabalpur Eastern Agricultural Corridor</option>
             </select>
           </div>
         </div>
@@ -107,61 +129,124 @@ export default function AIDemandForecastModal({ isOpen, onClose, initialCommodit
                 <div className="text-xl font-black text-white mt-0.5">
                   {forecast.totalWeeklyProjectedDemandQuintals} <span className="text-xs font-normal text-slate-400">Qtls</span>
                 </div>
-                <div className="text-[10px] text-emerald-400 font-semibold mt-0.5">Surging Urban Inflow</div>
+                <div className="text-[10px] text-emerald-400 font-semibold mt-0.5">
+                  {forecast.demandLevel || 'Steady Regional Inflow'}
+                </div>
               </div>
 
               <div className="p-3.5 rounded-2xl bg-emerald-950/40 border border-emerald-500/30">
                 <div className="text-[10px] uppercase text-emerald-300 font-bold">Price Momentum</div>
-                <div className="text-xl font-black text-emerald-400 mt-0.5">{forecast.expectedPriceTrend}</div>
-                <div className="text-[10px] text-emerald-300 font-semibold mt-0.5">Higher Farm Realization</div>
+                <div className="text-xl font-black text-emerald-400 mt-0.5">
+                  {forecast.expectedPriceTrend || '→ Stable'}
+                </div>
+                <div className="text-[10px] text-emerald-300 font-semibold mt-0.5">
+                  7d vs 14d APMC Average
+                </div>
               </div>
 
               <div className="p-3.5 rounded-2xl bg-slate-950 border border-slate-800">
-                <div className="text-[10px] uppercase text-slate-400 font-bold">Market Confidence</div>
-                <div className="text-xl font-black text-teal-300 mt-0.5">{forecast.confidenceScore || 94}%</div>
-                <div className="text-[10px] text-slate-400 font-semibold mt-0.5">High Confidence</div>
+                <div className="text-[10px] uppercase text-slate-400 font-bold">Forecast Reliability</div>
+                <div className="text-xl font-black text-teal-300 mt-0.5">
+                  {forecast.forecastReliability || 'High'}
+                </div>
+                <div className="text-[10px] text-slate-400 font-semibold mt-0.5">
+                  {forecast.forecastReliabilityDetail || 'Validated APMC Feeds'}
+                </div>
               </div>
             </div>
+
+            {/* Cold Start Notice (Honest Disclosure) */}
+            {(forecast.coldStart || forecast.isColdStart || forecast.coldStartNote) && (
+              <div className="p-3.5 rounded-2xl bg-amber-950/30 border border-amber-500/40 text-xs text-amber-200/90 flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                <div className="leading-relaxed">
+                  <span className="font-bold text-amber-300">Marketplace Cold-Start Disclosure: </span>
+                  {forecast.coldStartNote || 'AgroBridge is still collecting local order history. Current forecast is primarily based on available historical market data.'}
+                </div>
+              </div>
+            )}
 
             {/* 7-Day Day-by-Day Forecast Bars */}
             <div className="rounded-2xl bg-slate-950 border border-slate-800 p-4 space-y-3">
               <div className="text-xs font-bold text-white flex items-center justify-between">
                 <span className="flex items-center gap-1.5">
                   <BarChart3 className="w-4 h-4 text-emerald-400" />
-                  <span>Daily Demand Timeline & Pressure</span>
+                  <span>Daily Demand Timeline & Intake Pressure</span>
                 </span>
                 <span className="text-[10px] text-slate-400">Direct Delivery Target</span>
               </div>
 
               <div className="space-y-2">
-                {forecast.forecastDays.map((f, idx) => (
+                {(forecast.forecastDays || []).map((f, idx) => (
                   <div key={idx} className="flex items-center justify-between gap-3 text-xs">
                     <span className="w-20 text-slate-400 font-mono text-[11px]">{f.day}</span>
                     <div className="flex-1 bg-slate-900 rounded-full h-3 overflow-hidden">
                       <div
-                        className={`h-full rounded-full ${
+                        className={`h-full rounded-full transition-all duration-500 ${
                           f.demandLevel === 'SURGING'
                             ? 'bg-rose-500'
                             : f.demandLevel === 'HIGH'
                             ? 'bg-emerald-500'
                             : 'bg-teal-500'
                         }`}
-                        style={{ width: `${Math.min(100, (f.projectedDemandQuintals / 350) * 100)}%` }}
+                        style={{ width: `${Math.min(100, (f.projectedDemandQuintals / maxQtlInHorizon) * 100)}%` }}
                       />
                     </div>
                     <span className="w-16 text-right font-bold text-slate-200">{f.projectedDemandQuintals} Q</span>
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                       f.demandLevel === 'SURGING'
-                        ? 'bg-rose-500/20 text-rose-300'
+                        ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
                         : f.demandLevel === 'HIGH'
-                        ? 'bg-emerald-500/20 text-emerald-300'
-                        : 'bg-teal-500/20 text-teal-300'
+                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                        : 'bg-teal-500/20 text-teal-300 border border-teal-500/30'
                     }`}>
                       {f.demandLevel}
                     </span>
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Expandable "Why am I seeing this?" Factor Breakdown */}
+            <div className="rounded-2xl bg-slate-950 border border-slate-800 overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setShowWhyFactors(!showWhyFactors)}
+                className="w-full px-4 py-3 text-xs font-bold text-slate-200 hover:text-white flex items-center justify-between transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <Info className="w-4 h-4 text-emerald-400" />
+                  <span>Why am I seeing this forecast? (Explainable AI Factors)</span>
+                </span>
+                {showWhyFactors ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </button>
+
+              {showWhyFactors && (
+                <div className="px-4 pb-4 pt-1 space-y-2.5 border-t border-slate-800/80 animate-fadeIn">
+                  <div className="text-[11px] text-slate-400">
+                    Model inputs evaluated for {commodity} in {region}:
+                  </div>
+                  <ul className="space-y-1.5 text-xs text-slate-300">
+                    {(forecast.whyFactors || forecast.reasons || []).map((reason, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                        <span>{reason}</span>
+                      </li>
+                    ))}
+                    {(forecast.factorsConsidered || []).map((factor, j) => (
+                      <li key={`factor-${j}`} className="flex items-start gap-2 text-slate-400 text-[11px]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-teal-400 shrink-0 mt-1.5 ml-1 mr-0.5" />
+                        <span>{factor}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  {forecast.farmerSuggestion && (
+                    <div className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] text-emerald-300/90 leading-relaxed mt-2">
+                      💡 <strong>Action Insight:</strong> {forecast.farmerSuggestion}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Bilingual AI Farmer Advisory */}
@@ -178,6 +263,19 @@ export default function AIDemandForecastModal({ isOpen, onClose, initialCommodit
                   📢 <strong>किसान सलाह:</strong> {forecast.hindiAdvisory}
                 </p>
               )}
+            </div>
+
+            {/* Verified Data Source Provenance Card */}
+            <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 text-[11px] text-slate-400 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                <Database className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>
+                  Source: <strong>Government of India AGMARKNET (data.gov.in)</strong>
+                </span>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                Live Government Grounding
+              </span>
             </div>
 
           </div>

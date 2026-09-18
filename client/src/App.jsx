@@ -20,6 +20,10 @@ import FarmerProfitPage from './pages/FarmerProfitPage';
 import AdminRevenuePage from './pages/AdminRevenuePage';
 import AdminExpensesPage from './pages/AdminExpensesPage';
 import AdminTransactionsPage from './pages/AdminTransactionsPage';
+import FarmerWhatsAppPage from './pages/FarmerWhatsAppPage';
+import FarmerIVRPage from './pages/FarmerIVRPage';
+import AdminCampaignsPage from './pages/AdminCampaignsPage';
+import FarmerAIPage from './pages/FarmerAIPage';
 import AgroBridgeAIChatbot from './components/AgroBridgeAIChatbot';
 import { Key, X, Check, ArrowRight } from 'lucide-react';
 
@@ -297,6 +301,78 @@ export default function App() {
         );
       }
       return <AdminTransactionsPage currentUser={currentUser} onNavigate={navigate} onLogout={handleLogout} />;
+    }
+
+    // Farmer WhatsApp Assistant Route: /farmer/whatsapp
+    if (currentRoute === '/farmer/whatsapp') {
+      if (!currentUser) {
+        return <RoleLoginPage roleConfig={ROLE_CONFIGS.FARMER} onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />;
+      }
+      if (currentUser.role !== 'FARMER') {
+        return (
+          <UnauthorizedAccessCard
+            requiredRole="Farmer"
+            userRole={currentUser.role}
+            correctLoginRoute="/farmer/login"
+            onNavigate={navigate}
+          />
+        );
+      }
+      return <FarmerWhatsAppPage currentUser={currentUser} onNavigate={navigate} onLogout={handleLogout} />;
+    }
+
+    // Farmer IVR / Missed Call Route: /farmer/ivr
+    if (currentRoute === '/farmer/ivr') {
+      if (!currentUser) {
+        return <RoleLoginPage roleConfig={ROLE_CONFIGS.FARMER} onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />;
+      }
+      if (currentUser.role !== 'FARMER') {
+        return (
+          <UnauthorizedAccessCard
+            requiredRole="Farmer"
+            userRole={currentUser.role}
+            correctLoginRoute="/farmer/login"
+            onNavigate={navigate}
+          />
+        );
+      }
+      return <FarmerIVRPage currentUser={currentUser} onNavigate={navigate} onLogout={handleLogout} />;
+    }
+
+    // Farmer AI Decision Support Route: /farmer/ai
+    if (currentRoute === '/farmer/ai' || currentRoute.startsWith('/farmer/ai?')) {
+      if (!currentUser) {
+        return <RoleLoginPage roleConfig={ROLE_CONFIGS.FARMER} onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />;
+      }
+      if (currentUser.role !== 'FARMER') {
+        return (
+          <UnauthorizedAccessCard
+            requiredRole="Farmer"
+            userRole={currentUser.role}
+            correctLoginRoute="/farmer/login"
+            onNavigate={navigate}
+          />
+        );
+      }
+      return <FarmerAIPage currentUser={currentUser} onNavigate={navigate} onLogout={handleLogout} />;
+    }
+
+    // Admin AI Campaigns & Telephony Governance Route: /admin/campaigns
+    if (currentRoute === '/admin/campaigns') {
+      if (!currentUser) {
+        return <RoleLoginPage roleConfig={ROLE_CONFIGS.ADMIN} onNavigate={navigate} onLoginSuccess={handleLoginSuccess} />;
+      }
+      if (currentUser.role !== 'ADMIN') {
+        return (
+          <UnauthorizedAccessCard
+            requiredRole="Admin"
+            userRole={currentUser.role}
+            correctLoginRoute="/admin/login"
+            onNavigate={navigate}
+          />
+        );
+      }
+      return <AdminCampaignsPage currentUser={currentUser} onNavigate={navigate} onLogout={handleLogout} />;
     }
 
     const isBulkBuyerRoute = currentRoute.startsWith('/bulk-buyer/') && !currentRoute.includes('/login') && !currentRoute.includes('/register');
